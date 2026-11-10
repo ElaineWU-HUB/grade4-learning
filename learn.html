@@ -10,6 +10,7 @@
 
   <header class="topbar">
     <div class="topbar-inner">
+      <button class="side-toggle no-print" id="sideToggle" type="button" title="打开/收起目录">📑 目录</button>
       <a class="brand" href="index.html"><span class="logo">🎒</span> 四年级学习小站</a>
       <nav class="nav" id="mainNav">
         <a href="index.html">🏠 首页</a>
@@ -21,9 +22,15 @@
     </div>
   </header>
 
-  <main class="container" id="app">
-    <p>加载中…</p>
-  </main>
+  <div class="layout">
+    <aside class="sidebar no-print" id="sidebar">
+      <div class="side-outline" id="sideOutline"></div>
+      <nav class="side-nav" id="sideNav"></nav>
+    </aside>
+    <main class="container" id="app">
+      <p>加载中…</p>
+    </main>
+  </div>
 
   <footer class="footer no-print">
     四年级学习小站 · 每天进步一点点,星星就会连成片 ⭐
@@ -33,6 +40,7 @@
   <script src="js/data-math.js"></script>
   <script src="js/data-english.js"></script>
   <script src="js/data-extras.js"></script>
+  <script src="js/data-videos.js"></script>
   <script src="js/app.js"></script>
   <script>
     App.startLearn && App.startLearn();
