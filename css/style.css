@@ -407,6 +407,22 @@ table.tb tbody tr:hover { background: #fffcf3; }
   to { transform: translateY(105vh) rotate(720deg); opacity: .9; }
 }
 
+/* ---------- 视频讲解 ---------- */
+.video-note { font-size: 13.5px; color: var(--ink-2); margin: -6px 0 14px; }
+.video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 16px; }
+.video-card {
+  background: #fff; border: 2px dashed #b9c6ee; border-radius: 16px;
+  padding: 16px 18px; box-shadow: var(--shadow);
+  animation: fadeUp .5s ease both;
+}
+.video-card .v-title { font-weight: 800; font-size: 15.5px; margin-bottom: 2px; }
+.video-card .v-author { font-size: 13px; color: var(--ink-2); margin-bottom: 10px; }
+.video-frame { margin-top: 12px; position: relative; padding-top: 56.25%; }
+.video-frame iframe {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  border: 0; border-radius: 12px; background: #000;
+}
+
 /* ---------- 口算大挑战 ---------- */
 .mg-box { text-align: center; padding: 30px 20px; }
 .mg-question { font-size: 48px; font-weight: 800; margin: 18px 0; letter-spacing: 6px; font-family: var(--font-round); }
@@ -440,6 +456,178 @@ table.tb tbody tr:hover { background: #fffcf3; }
   60% { transform: scale(1.08); opacity: 1; }
   100% { transform: scale(1); }
 }
+
+/* ============================================================
+   左侧书签导航栏 + 布局
+   ============================================================ */
+.layout { display: flex; align-items: flex-start; max-width: 1280px; margin: 0 auto; }
+.layout .container { flex: 1; min-width: 0; }
+
+.sidebar {
+  flex: 0 0 232px; width: 232px;
+  position: sticky; top: 66px;
+  height: calc(100vh - 66px); overflow-y: auto;
+  padding: 14px 10px 30px;
+  font-size: 14px;
+}
+.sidebar::-webkit-scrollbar { width: 6px; }
+.sidebar::-webkit-scrollbar-thumb { background: #e0d8c2; border-radius: 6px; }
+
+.side-link {
+  display: block; padding: 8px 14px; margin-bottom: 6px;
+  border-radius: 12px; text-decoration: none; color: var(--ink);
+  font-weight: 700; background: #fff; box-shadow: var(--shadow);
+  transition: transform .12s, box-shadow .15s;
+}
+.side-link:hover { transform: translateX(4px); box-shadow: var(--shadow-lg); }
+
+.side-group { margin-bottom: 6px; background: #fff; border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
+.side-grp {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 9px 14px; border: none; background: none;
+  font-family: inherit; font-size: 14.5px; font-weight: 800; color: var(--ink);
+  cursor: pointer; text-align: left;
+}
+.side-grp:hover { background: #faf6ea; }
+.side-grp .caret { transition: transform .2s; color: #b0a37c; }
+.side-group.open .side-grp .caret { transform: rotate(180deg); }
+
+.side-sub { display: none; padding: 2px 6px 8px; }
+.side-group.open .side-sub { display: block; }
+.side-sem {
+  display: block; width: 100%; padding: 6px 10px; border: none; background: none;
+  font-family: inherit; font-size: 13.5px; font-weight: 700; color: var(--ink-2);
+  cursor: pointer; text-align: left; border-radius: 8px;
+}
+.side-sem:hover { background: var(--subj-soft, #f5f0e2); color: var(--subj, #555); }
+.side-units { display: none; padding: 2px 0 4px 8px; }
+.side-sub.open .side-units { display: block; }
+.side-unit {
+  display: block; padding: 5px 10px; border-radius: 8px;
+  text-decoration: none; color: var(--ink-2); font-size: 13px;
+  border-left: 3px solid transparent; line-height: 1.6;
+}
+.side-unit:hover { background: var(--subj-soft, #f5f0e2); color: var(--ink); }
+.side-unit.on { background: var(--subj-soft, #f5f0e2); color: var(--subj, #555); border-left-color: var(--subj, #ccc); font-weight: 800; }
+
+.side-outline { background: #fffdf4; border: 2px dashed #e8c766; border-radius: 12px; padding: 8px 10px; margin-bottom: 10px; }
+.side-outline:empty { display: none; }
+.outline-t { font-weight: 800; font-size: 13.5px; color: #8a6d1a; padding: 2px 4px 4px; }
+.outline-item {
+  display: block; padding: 4px 8px; border-radius: 8px;
+  color: var(--ink-2); font-size: 13px; cursor: pointer; line-height: 1.6;
+}
+.outline-item:hover { background: #fff3cf; color: #8a6d1a; }
+
+.side-toggle {
+  display: none; align-items: center; gap: 4px;
+  border: 2px solid var(--line); background: #fff; color: var(--ink);
+  border-radius: 999px; padding: 6px 14px; font-family: inherit;
+  font-size: 14.5px; font-weight: 800; cursor: pointer;
+}
+.side-toggle:hover { border-color: #d9cfae; background: #faf6ea; }
+
+@media (max-width: 960px) {
+  .layout { display: block; }
+  .side-toggle { display: inline-flex; }
+  .sidebar {
+    position: fixed; left: -300px; top: 0; bottom: 0; width: 280px; height: 100vh;
+    z-index: 80; background: #faf6ee; padding: 14px 12px 40px;
+    box-shadow: 4px 0 24px rgba(60, 50, 30, .2);
+    transition: left .25s ease;
+  }
+  body.side-open .sidebar { left: 0; }
+}
+
+/* ============================================================
+   图文并茂组件
+   ============================================================ */
+/* 单元顶部横幅:大场景emoji */
+.unit-head {
+  background: linear-gradient(135deg, var(--subj-soft, #fff), #fff);
+  border: 3px dashed var(--subj, #ccc); border-radius: 22px;
+  padding: 20px 22px 16px; margin-bottom: 20px;
+  box-shadow: var(--shadow); position: relative; overflow: hidden;
+}
+.unit-head::after {
+  content: '⭐'; position: absolute; right: 12px; top: 8px;
+  font-size: 30px; opacity: .5; transform: rotate(14deg);
+}
+.unit-head .scene {
+  font-size: 46px; letter-spacing: 8px; line-height: 1.25;
+  animation: float 4s ease-in-out infinite;
+  filter: drop-shadow(0 4px 6px rgba(60,50,30,.18));
+}
+.unit-head .page-title { margin-top: 4px; }
+.unit-goal { background: rgba(255,255,255,.85); }
+
+/* 课文卡上的"贴纸" */
+.text-card { position: relative; }
+.text-card .sticker {
+  position: absolute; top: -12px; right: -4px; font-size: 34px;
+  transform: rotate(12deg); filter: drop-shadow(0 3px 4px rgba(60,50,30,.2));
+  pointer-events: none;
+}
+
+/* 知识点步骤编号 */
+.point-card { position: relative; }
+.step-num {
+  position: absolute; left: -19px; top: -6px;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--subj, #ccc); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 16px; box-shadow: 0 3px 8px rgba(60,50,30,.2);
+  border: 3px solid #fff;
+}
+
+/* 英语单词卡片 */
+.word-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.word-chip {
+  background: var(--subj-soft, #f3efe4); border-radius: 14px;
+  padding: 12px 14px; text-align: center;
+  border: 2px solid transparent; transition: transform .15s, border-color .15s;
+  animation: fadeUp .45s ease both;
+}
+.word-chip:hover { transform: translateY(-4px) rotate(-1deg); border-color: var(--subj, #ccc); }
+.word-chip.alt { background: #fff; border: 2px dashed var(--subj-soft, #e8e2d4); }
+.word-chip .w-en { font-weight: 800; font-size: 16.5px; color: var(--subj, #555); }
+.word-chip .w-cn { font-size: 15px; margin-top: 2px; }
+.word-chip .w-n { font-size: 12.5px; color: var(--ink-2); margin-top: 4px; }
+
+/* 首页:今日闯关推荐 */
+.today-card {
+  display: flex; align-items: center; gap: 16px;
+  max-width: 760px; margin: 26px auto 0;
+  background: linear-gradient(135deg, #ffe9a8, #ffd43b);
+  border: 3px solid #f0c75e; border-radius: 22px;
+  padding: 16px 22px; text-decoration: none; color: #6b4d00;
+  box-shadow: var(--shadow-lg); transition: transform .18s;
+  animation: fadeUp .5s ease both;
+}
+.today-card:hover { transform: translateY(-4px) scale(1.01); }
+.today-card .t-emoji { font-size: 44px; animation: float 3s ease-in-out infinite; }
+.today-card .t-mid { flex: 1; min-width: 0; }
+.today-card .t-title { font-weight: 800; font-size: 17px; }
+.today-card .t-desc { font-size: 14.5px; color: #8a6d1a; }
+.today-card .t-go {
+  font-size: 22px; font-weight: 800; background: #fff;
+  border-radius: 999px; padding: 6px 20px; box-shadow: var(--shadow);
+}
+
+/* 首页漂浮装饰小图标 */
+.hero { position: relative; }
+.float-e {
+  position: absolute; font-size: 26px; opacity: .5; pointer-events: none;
+  filter: drop-shadow(0 3px 4px rgba(60,50,30,.15));
+}
+.f1 { left: 10%; top: 8%; animation: float 4s ease-in-out infinite; }
+.f2 { right: 12%; top: 12%; animation: float 5s ease-in-out 1s infinite; }
+.f3 { left: 18%; bottom: 10%; animation: float 4.6s ease-in-out .6s infinite; }
+.f4 { right: 20%; bottom: 6%; animation: float 5.4s ease-in-out 1.6s infinite; }
+.f5 { right: 6%; top: 45%; animation: float 4.2s ease-in-out .3s infinite; }
+
+/* 书签锚点:滚过去时避开吸顶顶栏 */
+.section-title { scroll-margin-top: 84px; }
 
 /* ---------- 打印 ---------- */
 @media print {
