@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学习地图 · 四年级学习小站</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="index.html"><span class="logo">🎒</span> 四年级学习小站</a>
+      <nav class="nav" id="mainNav">
+        <a href="index.html">🏠 首页</a>
+        <a href="#/chinese">📖 语文</a>
+        <a href="#/math">🧮 数学</a>
+        <a href="#/english">🔤 英语</a>
+        <a href="#/scores">⭐ 我的成绩</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" id="app">
+    <p>加载中…</p>
+  </main>
+
+  <footer class="footer no-print">
+    四年级学习小站 · 每天进步一点点,星星就会连成片 ⭐
+  </footer>
+
+  <script src="js/data-chinese.js"></script>
+  <script src="js/data-math.js"></script>
+  <script src="js/data-english.js"></script>
+  <script src="js/data-extras.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    App.startLearn && App.startLearn();
+  </script>
+</body>
+</html>
