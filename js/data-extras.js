@@ -28,6 +28,28 @@ window.UNIT_EMOJI = {
   'english-s1-u4': '👕', 'english-s1-u5': '🛍️'
 };
 
+/* 每个单元的"场景图"(大emoji组合,渲染在单元页顶部横幅) */
+window.UNIT_SCENE = {
+  /* 语文 · 四年级上册 */
+  'chinese-s0-u0': '🌊⛵🌅', 'chinese-s0-u1': '🦇📡💡', 'chinese-s0-u2': '🐜🍃🔍', 'chinese-s0-u3': '🐉🏔️✨',
+  'chinese-s0-u4': '🕊️⛰️🌈', 'chinese-s0-u5': '🎈🐄🪀', 'chinese-s0-u6': '🏮🇨🇳🎭', 'chinese-s0-u7': '📜🏛️🧠',
+  /* 语文 · 四年级下册 */
+  'chinese-s1-u0': '🏡🌾🌼', 'chinese-s1-u1': '🦖🔬💎', 'chinese-s1-u2': '🖋️🌿📗', 'chinese-s1-u3': '🐱🐔🦢',
+  'chinese-s1-u4': '🌅⛰️🛶', 'chinese-s1-u5': '🌾👦📖', 'chinese-s1-u6': '🚢🎖️🏔️', 'chinese-s1-u7': '🧚🎪🐚',
+  /* 数学 · 四年级上册 */
+  'math-s0-u0': '🔢🏙️🌍', 'math-s0-u1': '🏟️🗺️📏', 'math-s0-u2': '📐⏰🧭', 'math-s0-u3': '✖️🧮📝',
+  'math-s0-u4': '🔷🪜🌉', 'math-s0-u5': '➗📚✅', 'math-s0-u6': '📊📈🎯', 'math-s0-u7': '🍵🐎⏱️',
+  /* 数学 · 四年级下册 */
+  'math-s1-u0': '➕➖✖️➗', 'math-s1-u1': '🔭📦👀', 'math-s1-u2': '⚖️🚀💡', 'math-s1-u3': '🎯🔟✨',
+  'math-s1-u4': '🔺🏗️🎪', 'math-s1-u5': '✏️🛒💰', 'math-s1-u6': '🪞✂️🦋', 'math-s1-u7': '📈🧮👥', 'math-s1-u8': '🐔🐰🧩',
+  /* 英语 · 四年级上册 */
+  'english-s0-u0': '🏫🪑📚', 'english-s0-u1': '🎒📕✏️', 'english-s0-u2': '👫🧢🕶️', 'english-s0-u3': '🏠🛋️🔑',
+  'english-s0-u4': '🍜🥢🍲', 'english-s0-u5': '👨‍👩‍👧‍👦⚽',
+  /* 英语 · 四年级下册 */
+  'english-s1-u0': '🏫📚🗺️', 'english-s1-u1': '⏰🕘☀️', 'english-s1-u2': '🌦️☔🌈', 'english-s1-u3': '🚜🐄🌽',
+  'english-s1-u4': '👕👗🧥', 'english-s1-u5': '🛍️🛒💰'
+};
+
 window.EXTRAS = {
   /* ==================== 语文 · 四年级上册 ==================== */
   'chinese-s0-u0': [
