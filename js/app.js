@@ -24,9 +24,13 @@
   var SUBJECTS = {
     chinese: window.CHINESE_DATA,
     math: window.MATH_DATA,
-    english: window.ENGLISH_DATA
+    english: window.ENGLISH_DATA,
+    history: window.HISTORY_DATA,
+    geography: window.GEOGRAPHY_DATA,
+    humanities: window.HUMANITIES_DATA,
+    science: window.SCIENCE_DATA
   };
-  var ORDER = ['chinese', 'math', 'english'];
+  var ORDER = ['chinese', 'math', 'english', 'history', 'geography', 'humanities', 'science'];
 
   /* ---------- 学习进度(本地存储) ---------- */
   var MEMORY = {};                 // localStorage 不可用时的后备
