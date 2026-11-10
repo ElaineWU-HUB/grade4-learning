@@ -652,3 +652,33 @@ table.tb tbody tr:hover { background: #fffcf3; }
   .mg-question { font-size: 36px; }
   .bubble::before { display: none; }
 }
+
+/* ---------- iPad / 平板适配 ---------- */
+/* iPad Safari 地址栏收放时 100vh 会超出可视区,dvh 更准确 */
+.sidebar {
+  height: calc(100vh - 66px);
+  height: calc(100dvh - 66px);
+}
+@media (max-width: 960px) {
+  .sidebar { height: 100vh; height: 100dvh; }
+  /* 抽屉打开时页面蒙上淡色遮罩,点遮罩即收起 */
+  body.side-open::before {
+    content: ''; position: fixed; inset: 0; z-index: 79;
+    background: rgba(43, 43, 51, .28);
+  }
+  /* 平板竖屏时顶栏收紧凑一些 */
+  .topbar-inner { gap: 10px; padding: 8px 16px; }
+  .brand { font-size: 19px; }
+  .nav a { padding: 7px 13px; font-size: 14.5px; }
+}
+
+/* 触屏设备(手机/平板):加大点按目标,手指更好点 */
+@media (pointer: coarse) {
+  .side-grp { padding: 11px 14px; }
+  .side-sem { padding: 9px 10px; }
+  .side-unit { padding: 8px 10px; font-size: 13.5px; }
+  .outline-item { padding: 7px 8px; }
+  .side-link { padding: 11px 14px; }
+  .side-toggle { padding: 9px 16px; }
+  .nav a { padding: 10px 16px; }
+}
