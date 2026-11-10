@@ -232,40 +232,61 @@
   function buildSidebar() {
     var nav = document.getElementById('sideNav');
     if (!nav) return;
-    var html = '<a class="side-link" href="index.html">🏠 回到首页</a>';
+    var html = '<div class="side-head">📚 学习目录</div>' +
+      '<a class="side-link side-home" href="index.html"><span class="sl-ico">🏠</span><span>回到首页</span></a>';
     ORDER.forEach(function (id) {
       var s = SUBJECTS[id];
-      html += '<div class="side-group">' +
-        '<button class="side-grp" type="button">' + s.emoji + ' ' + esc(s.name) + '<span class="caret">▾</span></button>' +
+      var total = 0, done = 0;
+      s.semesters.forEach(function (sem, si) {
+        sem.units.forEach(function (u, ui) {
+          total++;
+          if (getUnitState(id, si, ui).done) done++;
+        });
+      });
+      html += '<div class="side-group" style="--sc:' + s.color + ';--scs:' + s.soft + '">' +
+        '<button class="side-grp" type="button">' +
+          '<span class="grp-ico">' + s.emoji + '</span>' +
+          '<span class="grp-name">' + esc(s.name) + '</span>' +
+          '<span class="grp-prog">' + done + '/' + total + '</span>' +
+          '<span class="caret">▾</span>' +
+        '</button>' +
         '<div class="side-sub">';
       s.semesters.forEach(function (sem, si) {
-        html += '<button class="side-sem" type="button">📗 ' + esc(sem.name) + '</button>' +
+        html += '<div class="side-sem-group">' +
+          '<button class="side-sem" type="button">📗 ' + esc(sem.name) + '<span class="caret">▸</span></button>' +
           '<div class="side-units">';
         sem.units.forEach(function (u, ui) {
+          var uid2 = unitId(id, si, ui);
           html += '<a class="side-unit" href="#/' + id + '/s' + si + '/u' + ui + '">' +
-            ((window.UNIT_EMOJI || {})[unitId(id, si, ui)] || '·') + ' ' + esc(u.name) + '</a>';
+            '<span class="u-ico">' + ((window.UNIT_EMOJI || {})[uid2] || '📖') + '</span>' +
+            '<span class="u-name">' + esc(u.name) + '</span>' +
+            (getUnitState(id, si, ui).done ? '<span class="u-done">✓</span>' : '') +
+            '</a>';
         });
-        html += '</div>';
+        html += '</div></div>';
       });
       var topics = s.topics.concat((window.EXTRA_TOPICS || {})[id] || []);
       if (topics.length) {
-        html += '<button class="side-sem" type="button">🧩 专题复习</button><div class="side-units">';
+        html += '<div class="side-sem-group">' +
+          '<button class="side-sem" type="button">🧩 专题复习<span class="caret">▸</span></button>' +
+          '<div class="side-units">';
         topics.forEach(function (t, ti) {
-          html += '<a class="side-unit" href="#/' + id + '/t' + ti + '">' + (t.icon || '🧩') + ' ' + esc(t.name) + '</a>';
+          html += '<a class="side-unit" href="#/' + id + '/t' + ti + '">' +
+            '<span class="u-ico">' + (t.icon || '🧩') + '</span><span class="u-name">' + esc(t.name) + '</span></a>';
         });
-        html += '</div>';
+        html += '</div></div>';
       }
       html += '</div></div>';
     });
-    html += '<a class="side-link" href="#/scores">⭐ 我的成绩</a>' +
-      '<a class="side-link" href="#/math/game">🏎️ 口算大挑战</a>';
+    html += '<a class="side-link" href="#/scores"><span class="sl-ico">⭐</span><span>我的成绩</span></a>' +
+      '<a class="side-link" href="#/math/game"><span class="sl-ico">🏎️</span><span>口算大挑战</span></a>';
     nav.innerHTML = html;
 
     nav.addEventListener('click', function (e) {
       var grpBtn = e.target.closest('.side-grp');
       if (grpBtn) { grpBtn.parentElement.classList.toggle('open'); return; }
       var semBtn = e.target.closest('.side-sem');
-      if (semBtn) { semBtn.parentElement.classList.toggle('open'); return; }
+      if (semBtn) { semBtn.closest('.side-sem-group').classList.toggle('open'); return; }
       if (e.target.closest('.side-unit')) document.body.classList.remove('side-open');
     });
   }
@@ -280,7 +301,7 @@
         link.classList.add('on');
         var grp = link.closest('.side-group');
         if (grp) grp.classList.add('open');
-        var semBox = link.closest('.side-sub');
+        var semBox = link.closest('.side-sem-group');
         if (semBox) semBox.classList.add('open');
       }
       var app = document.getElementById('app');
@@ -289,7 +310,8 @@
         var html = '<div class="outline-t">📑 本页书签</div>';
         titles.forEach(function (h, i) {
           h.id = 'sec' + i;
-          html += '<a class="outline-item" data-target="sec' + i + '">' + esc(h.textContent) + '</a>';
+          html += '<a class="outline-item" data-target="sec' + i + '">' +
+            '<span class="o-n">' + (i + 1) + '</span><span class="o-t">' + esc(h.textContent) + '</span></a>';
         });
         outline.innerHTML = titles.length ? html : '';
         outline.querySelectorAll('.outline-item').forEach(function (a) {
@@ -337,10 +359,10 @@
     var navLinks = qs('#mainNav') ? qs('#mainNav').querySelectorAll('a') : [];
     navLinks.forEach(function (a) { a.classList.remove('active'); });
     if (r.subj && SUBJECTS[r.subj]) {
+      var s = SUBJECTS[r.subj];
       document.body.setAttribute('data-subject', r.subj);
-      var cssId = r.subj === 'chinese' ? '--c-chinese' : r.subj === 'math' ? '--c-math' : '--c-english';
-      document.body.style.setProperty('--subj', 'var(' + cssId + ')');
-      document.body.style.setProperty('--subj-soft', 'var(' + cssId + '-soft)');
+      document.body.style.setProperty('--subj', s.color);
+      document.body.style.setProperty('--subj-soft', s.soft);
       navLinks.forEach(function (a) {
         if (a.getAttribute('href') === '#/' + r.subj) a.classList.add('active');
       });
@@ -519,6 +541,20 @@
     var videos = (window.UNIT_VIDEOS || {})[uid];
     if (videos && videos.length) html += renderVideos(videos);
 
+    // 奥数思维挑战(数学单元专属:课本知识的升级版,不计入星星)
+    var olyQs = (window.OLYMPIAD || {})[uid];
+    if (olyQs && olyQs.length) {
+      html +=
+        '<h2 class="section-title">🏆 奥数思维挑战</h2>' +
+        '<div class="oly-note">🧠 这里是「' + esc(u.name) + '」知识的升级挑战题,全部用四年级学过的办法就能解出来!' +
+        '不用着急,慢慢想,画一画、列一列都是好办法。挑战成绩不记入星星,敢挑战就是胜利!</div>' +
+        '<div class="quiz-actions no-print">' +
+          '<button class="btn btn-primary" id="btnOlyPractice">🧠 尝试挑战(可看思路)</button>' +
+          '<button class="btn btn-ghost" id="btnOlyTest">🏆 挑战评测</button>' +
+        '</div>' +
+        '<div id="olympiadArea"></div>';
+    }
+
     // 练习与测验(课本练习题 + 增补题)
     var practice = u.practice.concat((window.EXTRA_QUESTIONS || {})[uid] || []);
     if (practice && practice.length) {
@@ -568,6 +604,18 @@
       });
       document.getElementById('btnTest').addEventListener('click', function () {
         initQuizArea(area, practice, subjId, semIdx, unitIdx, 'test');
+      });
+    }
+
+    // 奥数挑战区域(独立引擎实例,成绩存 'xxx-olym' 键,不影响单元星星)
+    var olyArea = document.getElementById('olympiadArea');
+    if (olyArea && olyQs && olyQs.length) {
+      initQuizArea(olyArea, olyQs, subjId, semIdx, unitIdx, 'practice', 'olympiad');
+      document.getElementById('btnOlyPractice').addEventListener('click', function () {
+        initQuizArea(olyArea, olyQs, subjId, semIdx, unitIdx, 'practice', 'olympiad');
+      });
+      document.getElementById('btnOlyTest').addEventListener('click', function () {
+        initQuizArea(olyArea, olyQs, subjId, semIdx, unitIdx, 'test', 'olympiad');
       });
     }
 
@@ -724,23 +772,28 @@
   /* ============================================================
      练习与测验引擎
      ============================================================ */
-  function initQuizArea(area, questions, subjId, semIdx, unitIdx, mode) {
+  function initQuizArea(area, questions, subjId, semIdx, unitIdx, mode, saveTo) {
     mode = mode || 'practice';
+    var isOly = saveTo === 'olympiad';
     var answers = new Array(questions.length).fill(null);   // 用户作答
     var state = new Array(questions.length).fill(false);     // 是否已判分/显示
 
     area.innerHTML = '<div class="no-print" style="font-size:14.5px;color:var(--ink-2);margin-bottom:8px;">' +
       (mode === 'practice'
-        ? '💡 练习模式:每道题做完可以点「对答案」,看看自己掌握得怎么样。'
-        : '🏆 测验模式:全部做完后点「提交批改」,自动判分赢星星!(建议独立完成,不要偷看答案哦)') +
+        ? (isOly
+          ? '🧠 挑战模式:先自己想一想,做不出来可以点「看思路」,看看解析是怎么想的。'
+          : '💡 练习模式:每道题做完可以点「对答案」,看看自己掌握得怎么样。')
+        : (isOly
+          ? '🏆 挑战评测:全部做完后点「提交批改」,看看你的奥数战绩!(挑战不记入单元星星)'
+          : '🏆 测验模式:全部做完后点「提交批改」,自动判分赢星星!(建议独立完成,不要偷看答案哦)')) +
       '</div>' +
-      '<div id="qList"></div>' +
-      '<div class="quiz-actions no-print" id="qaBtns"></div>' +
-      '<div id="qaResult"></div>';
+      '<div class="qList"></div>' +
+      '<div class="quiz-actions no-print qaBtns"></div>' +
+      '<div class="qaResult"></div>';
 
-    var list = document.getElementById('qList');
-    var btns = document.getElementById('qaBtns');
-    var resultBox = document.getElementById('qaResult');
+    var list = area.querySelector('.qList');
+    var btns = area.querySelector('.qaBtns');
+    var resultBox = area.querySelector('.qaResult');
 
     questions.forEach(function (q, i) {
       var card = el('div', 'question', '');
@@ -760,10 +813,10 @@
       } else {
         card.innerHTML += '<input class="fill-input" data-q="' + i + '" type="text" placeholder="在这里填写答案">';
       }
-      card.innerHTML += '<div class="explain" id="ex' + i + '"><b>解析:</b>' + esc(q.e || '') + '</div>';
+      card.innerHTML += '<div class="explain"><b>解析:</b>' + esc(q.e || '') + '</div>';
       if (mode === 'practice') {
         card.innerHTML += '<div class="no-print" style="margin-top:10px;">' +
-          '<button class="btn btn-small" data-check="' + i + '">对答案</button></div>';
+          '<button class="btn btn-small" data-check="' + i + '">' + (isOly ? '看思路' : '对答案') + '</button></div>';
       }
       list.appendChild(card);
     });
@@ -792,11 +845,11 @@
       }
     });
 
-    // 打印按钮(两种模式共用,用 onclick 避免重复绑定)
+    // 打印按钮(仅常规测验区;两种模式共用,用 onclick 避免重复绑定)
     var btnP = document.getElementById('btnPrint');
     var btnPA = document.getElementById('btnPrintA');
-    if (btnP) btnP.onclick = function () { resetMarks(list); window.print(); };
-    if (btnPA) btnPA.onclick = function () {
+    if (!isOly && btnP) btnP.onclick = function () { resetMarks(list); window.print(); };
+    if (!isOly && btnPA) btnPA.onclick = function () {
       questions.forEach(function (q, i) { judgeOne(list, questions, answers, i, false); });
       window.print();
     };
@@ -807,12 +860,12 @@
         b.addEventListener('click', function () { judgeOne(list, questions, answers, +b.dataset.check, true); });
       });
       btns.innerHTML =
-        '<button class="btn btn-ghost" id="btnShowAll">显示全部答案</button>' +
-        '<button class="btn btn-ghost" id="btnHideAll">隐藏答案</button>';
-      document.getElementById('btnShowAll').addEventListener('click', function () {
+        '<button class="btn btn-ghost btnShowAll">' + (isOly ? '显示全部思路' : '显示全部答案') + '</button>' +
+        '<button class="btn btn-ghost btnHideAll">' + (isOly ? '收起思路' : '隐藏答案') + '</button>';
+      btns.querySelector('.btnShowAll').addEventListener('click', function () {
         questions.forEach(function (q, i) { judgeOne(list, questions, answers, i, false); });
       });
-      document.getElementById('btnHideAll').addEventListener('click', function () {
+      btns.querySelector('.btnHideAll').addEventListener('click', function () {
         resetMarks(list);
       });
       return;
@@ -820,48 +873,67 @@
 
     // 测验模式按钮
     btns.innerHTML =
-      '<button class="btn btn-primary" id="btnGrade">提交批改</button>' +
-      '<button class="btn btn-ghost" id="btnReset">重新测验</button>';
-    document.getElementById('btnGrade').addEventListener('click', function () {
+      '<button class="btn btn-primary btnGrade">提交批改</button>' +
+      '<button class="btn btn-ghost btnReset">重新测验</button>';
+    btns.querySelector('.btnGrade').addEventListener('click', function () {
       var correct = 0;
       questions.forEach(function (q, i) {
         if (judgeOne(list, questions, answers, i, false)) correct++;
       });
       var best = correct / questions.length;
-      // 保存成绩
-      var st = getUnitState(subjId, semIdx, unitIdx);
-      st.done = st.done || best >= 0.6;
-      st.best = st.best == null ? best : Math.max(st.best, best);
-      setUnitState(subjId, semIdx, unitIdx, st);
-      var stars = starsFor(st);
 
       var gradeHTML;
-      if (best >= 0.6) {
-        gradeHTML = '<div class="quiz-score">🎉 ' + praise() + '<br>' +
-          '<div class="big">' + correct + ' / ' + questions.length + '</div>' +
-          '答对了 ' + correct + ' 道题,获得 ' + starsHTML(stars) + '</div>';
-        if (best >= 1) confetti();
+      if (isOly) {
+        // 奥数成绩独立保存到 'xxx-olym' 键,不影响单元星星
+        var p = loadProgress();
+        var okey = unitId(subjId, semIdx, unitIdx) + '-olym';
+        var ost = p[okey] || {};
+        ost.best = ost.best == null ? best : Math.max(ost.best, best);
+        p[okey] = ost;
+        saveProgress(p);
+        if (best >= 0.6) {
+          gradeHTML = '<div class="quiz-score">🏆 ' + praise() + '<br>' +
+            '<div class="big">' + correct + ' / ' + questions.length + '</div>' +
+            '答对了 ' + correct + ' 道挑战题,奥数小勇士,思维又变强啦!</div>';
+        } else {
+          gradeHTML = '<div class="quiz-score">💪 别灰心!答对了 ' + correct + ' / ' + questions.length + '<br>' +
+            '<span style="font-size:15.5px;color:var(--ink-2);">奥数题本来就难,看看下面的思路,弄明白再挑战一次吧!</span>' +
+            '<div style="margin-top:10px;"><button class="btn btn-primary btnRetryWrong">错题重练</button></div></div>';
+        }
       } else {
-        gradeHTML = '<div class="quiz-score">💪 别灰心!答对了 ' + correct + ' / ' + questions.length + '<br>' +
-          '<span style="font-size:15.5px;color:var(--ink-2);">看看下面的解析,把错题弄明白,再挑战一次吧!</span>' +
-          '<div style="margin-top:10px;"><button class="btn btn-primary" id="btnRetryWrong">错题重练</button></div></div>';
+        // 保存成绩
+        var st = getUnitState(subjId, semIdx, unitIdx);
+        st.done = st.done || best >= 0.6;
+        st.best = st.best == null ? best : Math.max(st.best, best);
+        setUnitState(subjId, semIdx, unitIdx, st);
+        var stars = starsFor(st);
+        if (best >= 0.6) {
+          gradeHTML = '<div class="quiz-score">🎉 ' + praise() + '<br>' +
+            '<div class="big">' + correct + ' / ' + questions.length + '</div>' +
+            '答对了 ' + correct + ' 道题,获得 ' + starsHTML(stars) + '</div>';
+          if (best >= 1) confetti();
+        } else {
+          gradeHTML = '<div class="quiz-score">💪 别灰心!答对了 ' + correct + ' / ' + questions.length + '<br>' +
+            '<span style="font-size:15.5px;color:var(--ink-2);">看看下面的解析,把错题弄明白,再挑战一次吧!</span>' +
+            '<div style="margin-top:10px;"><button class="btn btn-primary btnRetryWrong">错题重练</button></div></div>';
+        }
       }
       if (best >= 0.6 && best < 1) {
-        gradeHTML += '<div style="text-align:center;margin-top:6px;" class="no-print"><button class="btn btn-ghost" id="btnRetryWrong">错题重练</button></div>';
+        gradeHTML += '<div style="text-align:center;margin-top:6px;" class="no-print"><button class="btn btn-ghost btnRetryWrong">错题重练</button></div>';
       }
       resultBox.innerHTML = gradeHTML;
       resultBox.scrollIntoView({ behavior: 'smooth' });
 
-      var rb = document.getElementById('btnRetryWrong');
+      var rb = resultBox.querySelector('.btnRetryWrong');
       if (rb) rb.addEventListener('click', function () {
         var wrong = questions.filter(function (q, i) { return !isCorrect(q, answers[i]); });
         if (!wrong.length) { alert('太棒了,没有错题!🎉'); return; }
-        initQuizArea(area, wrong, subjId, semIdx, unitIdx, 'test');
+        initQuizArea(area, wrong, subjId, semIdx, unitIdx, 'test', saveTo);
       });
-      document.getElementById('btnGrade').disabled = true;
+      btns.querySelector('.btnGrade').disabled = true;
     });
-    document.getElementById('btnReset').addEventListener('click', function () {
-      initQuizArea(area, questions, subjId, semIdx, unitIdx, 'test');
+    btns.querySelector('.btnReset').addEventListener('click', function () {
+      initQuizArea(area, questions, subjId, semIdx, unitIdx, 'test', saveTo);
     });
   }
 
