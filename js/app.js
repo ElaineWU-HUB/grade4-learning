@@ -214,6 +214,13 @@
       document.body.classList.remove('side-open');
       route();
     });
+    // 点侧栏以外的地方(遮罩)收起抽屉
+    document.addEventListener('click', function (e) {
+      if (document.body.classList.contains('side-open') &&
+          !e.target.closest('#sidebar') && !e.target.closest('#sideToggle')) {
+        document.body.classList.remove('side-open');
+      }
+    });
     route();
   }
 
