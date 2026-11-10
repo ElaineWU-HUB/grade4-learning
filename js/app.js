@@ -147,8 +147,30 @@
     initDailyQuote();
     initMascot();
     var grid = document.getElementById('subjectCards');
-    if (!grid) return;
-    grid.innerHTML = subjectCardsHTML();
+    if (grid) grid.innerHTML = subjectCardsHTML();
+    var tc = document.getElementById('todayCard');
+    if (tc) tc.innerHTML = todayCardHTML();
+  }
+
+  /* ---------- 今日闯关推荐(首页):自动找到下一个未完成的单元 ---------- */
+  function todayCardHTML() {
+    for (var oi = 0; oi < ORDER.length; oi++) {
+      var s = SUBJECTS[ORDER[oi]];
+      for (var si = 0; si < s.semesters.length; si++) {
+        for (var ui = 0; ui < s.semesters[si].units.length; ui++) {
+          if (!getUnitState(s.id, si, ui).done) {
+            var u = s.semesters[si].units[ui];
+            return '<a class="today-card" href="learn.html#/' + s.id + '/s' + si + '/u' + ui + '">' +
+              '<div class="t-emoji">' + ((window.UNIT_EMOJI || {})[unitId(s.id, si, ui)] || '⭐') + '</div>' +
+              '<div class="t-mid"><div class="t-title">🌟 今日闯关推荐</div>' +
+              '<div class="t-desc">' + s.emoji + ' ' + esc(s.semesters[si].name) + ' · ' + esc(u.name) +
+              ' —— 点击开始今天的学习!</div></div>' +
+              '<div class="t-go">GO ›</div></a>';
+          }
+        }
+      }
+    }
+    return '';
   }
 
   /* ---------- 猫头鹰老师吉祥物:轮换学习小贴士 ---------- */
@@ -183,8 +205,93 @@
      学习页路由
      ============================================================ */
   function startLearn() {
-    window.addEventListener('hashchange', route);
+    buildSidebar();
+    var tog = document.getElementById('sideToggle');
+    if (tog) tog.addEventListener('click', function () {
+      document.body.classList.toggle('side-open');
+    });
+    window.addEventListener('hashchange', function () {
+      document.body.classList.remove('side-open');
+      route();
+    });
     route();
+  }
+
+  /* ---------- 左侧书签导航栏 ---------- */
+  function buildSidebar() {
+    var nav = document.getElementById('sideNav');
+    if (!nav) return;
+    var html = '<a class="side-link" href="index.html">🏠 回到首页</a>';
+    ORDER.forEach(function (id) {
+      var s = SUBJECTS[id];
+      html += '<div class="side-group">' +
+        '<button class="side-grp" type="button">' + s.emoji + ' ' + esc(s.name) + '<span class="caret">▾</span></button>' +
+        '<div class="side-sub">';
+      s.semesters.forEach(function (sem, si) {
+        html += '<button class="side-sem" type="button">📗 ' + esc(sem.name) + '</button>' +
+          '<div class="side-units">';
+        sem.units.forEach(function (u, ui) {
+          html += '<a class="side-unit" href="#/' + id + '/s' + si + '/u' + ui + '">' +
+            ((window.UNIT_EMOJI || {})[unitId(id, si, ui)] || '·') + ' ' + esc(u.name) + '</a>';
+        });
+        html += '</div>';
+      });
+      var topics = s.topics.concat((window.EXTRA_TOPICS || {})[id] || []);
+      if (topics.length) {
+        html += '<button class="side-sem" type="button">🧩 专题复习</button><div class="side-units">';
+        topics.forEach(function (t, ti) {
+          html += '<a class="side-unit" href="#/' + id + '/t' + ti + '">' + (t.icon || '🧩') + ' ' + esc(t.name) + '</a>';
+        });
+        html += '</div>';
+      }
+      html += '</div></div>';
+    });
+    html += '<a class="side-link" href="#/scores">⭐ 我的成绩</a>' +
+      '<a class="side-link" href="#/math/game">🏎️ 口算大挑战</a>';
+    nav.innerHTML = html;
+
+    nav.addEventListener('click', function (e) {
+      var grpBtn = e.target.closest('.side-grp');
+      if (grpBtn) { grpBtn.parentElement.classList.toggle('open'); return; }
+      var semBtn = e.target.closest('.side-sem');
+      if (semBtn) { semBtn.parentElement.classList.toggle('open'); return; }
+      if (e.target.closest('.side-unit')) document.body.classList.remove('side-open');
+    });
+  }
+
+  function updateSidebar(r) {
+    var outline = document.getElementById('sideOutline');
+    document.querySelectorAll('#sideNav .side-unit').forEach(function (a) { a.classList.remove('on'); });
+    if (r.view === 'unit') {
+      var sel = '#sideNav a[href="#/' + r.subj + '/s' + r.sem + '/u' + r.unit + '"]';
+      var link = document.querySelector(sel);
+      if (link) {
+        link.classList.add('on');
+        var grp = link.closest('.side-group');
+        if (grp) grp.classList.add('open');
+        var semBox = link.closest('.side-sub');
+        if (semBox) semBox.classList.add('open');
+      }
+      var app = document.getElementById('app');
+      if (outline && app) {
+        var titles = app.querySelectorAll('h2.section-title');
+        var html = '<div class="outline-t">📑 本页书签</div>';
+        titles.forEach(function (h, i) {
+          h.id = 'sec' + i;
+          html += '<a class="outline-item" data-target="sec' + i + '">' + esc(h.textContent) + '</a>';
+        });
+        outline.innerHTML = titles.length ? html : '';
+        outline.querySelectorAll('.outline-item').forEach(function (a) {
+          a.addEventListener('click', function () {
+            var el = document.getElementById(a.getAttribute('data-target'));
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            document.body.classList.remove('side-open');
+          });
+        });
+      }
+    } else if (outline) {
+      outline.innerHTML = '';
+    }
   }
 
   function parseHash() {
@@ -233,14 +340,16 @@
     }
 
     switch (r.view) {
-      case 'home': return renderHome(app);
-      case 'scores': return renderScores(app);
-      case 'game': return renderGame(app, r.subj);
-      case 'subject': return renderSubject(app, r.subj);
-      case 'semester': return renderSemester(app, r.subj, r.sem);
-      case 'unit': return renderUnit(app, r.subj, r.sem, r.unit);
-      case 'topic': return renderTopic(app, r.subj, r.topic);
+      case 'home': renderHome(app); break;
+      case 'scores': renderScores(app); break;
+      case 'game': renderGame(app, r.subj); break;
+      case 'subject': renderSubject(app, r.subj); break;
+      case 'semester': renderSemester(app, r.subj, r.sem); break;
+      case 'unit': renderUnit(app, r.subj, r.sem, r.unit); break;
+      case 'topic': renderTopic(app, r.subj, r.topic); break;
     }
+    updateSidebar(r);
+    window.scrollTo(0, 0);
   }
 
   /* ============================================================
@@ -372,8 +481,9 @@
         esc(u.name) +
       '</div>' +
       '<div class="unit-head">' +
-        '<div><h1 class="page-title">' + uemoji + ' ' + esc(u.name) + '</h1>' +
-        (u.goal ? '<div class="unit-goal">🎯 <b>单元目标:</b>' + esc(u.goal) + '</div>' : '') +
+        '<div>' + ((window.UNIT_SCENE || {})[uid] ? '<div class="scene">' + (window.UNIT_SCENE || {})[uid] + '</div>' : '') +
+        '<h1 class="page-title">' + uemoji + ' ' + esc(u.name) + '</h1>' +
+        (u.goal ? '<div class="unit-goal">🎯 <b>闯关任务:</b>' + esc(u.goal) + '</div>' : '') +
         '</div>' +
         '<div class="no-print" style="text-align:center;">' +
           starsHTML(starsFor(st)) +
@@ -394,6 +504,10 @@
     var extras = (window.EXTRAS || {})[uid];
     if (extras && extras.length) html += renderExtras(extras);
 
+    // 配套视频讲解(来自B站,联网观看)
+    var videos = (window.UNIT_VIDEOS || {})[uid];
+    if (videos && videos.length) html += renderVideos(videos);
+
     // 练习与测验(课本练习题 + 增补题)
     var practice = u.practice.concat((window.EXTRA_QUESTIONS || {})[uid] || []);
     if (practice && practice.length) {
@@ -409,6 +523,20 @@
     }
 
     app.innerHTML = html;
+
+    // 视频播放按钮(点击后内嵌B站播放器)
+    app.querySelectorAll('[data-bvid]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var card = btn.closest('.video-card');
+        var frame = card ? card.querySelector('.video-frame') : null;
+        if (!frame) return;
+        btn.remove();
+        frame.innerHTML =
+          '<iframe src="https://player.bilibili.com/player.html?bvid=' +
+          encodeURIComponent(btn.getAttribute('data-bvid')) +
+          '&page=1&high_quality=1&danmaku=0" scrolling="no" allowfullscreen="true"></iframe>';
+      });
+    });
 
     // 打卡按钮
     var btnDone = document.getElementById('btnDone');
@@ -438,8 +566,10 @@
   /* ---------- 语文:课文卡 ---------- */
   function renderTexts(texts, subjId) {
     var out = '<h2 class="section-title">📖 课文学习</h2>';
-    texts.forEach(function (t) {
+    var stickers = ['🌟', '📚', '🖍️', '🎈', '🏅', '🍀'];
+    texts.forEach(function (t, ti) {
       out += '<div class="card text-card">' +
+        '<span class="sticker">' + stickers[ti % stickers.length] + '</span>' +
         '<h3>' + esc(t.title) + '</h3>' +
         (t.sub ? '<div class="sub">' + esc(t.sub) + '</div>' : '') +
         (t.summary ? '<p><b>内容大意:</b>' + esc(t.summary) + '</p>' : '') +
@@ -480,8 +610,9 @@
   /* ---------- 数学:知识点卡 ---------- */
   function renderPoints(points) {
     var out = '<h2 class="section-title">💡 知识点讲解</h2>';
-    points.forEach(function (p) {
+    points.forEach(function (p, pi) {
       out += '<div class="card"><div class="point-card">' +
+        '<span class="step-num">' + (pi + 1) + '</span>' +
         '<div class="pt">' + esc(p.t) + '</div>' +
         (p.d ? '<div class="def">' + esc(p.d) + '</div>' : '') +
         (p.ex ? '<div class="example"><b>例题:</b> ' + esc(p.ex.q) + (p.ex.s ? '<br><b>解答:</b> ' + esc(p.ex.s) : '') + '</div>' : '') +
@@ -496,11 +627,15 @@
   function renderEnglishParts(u) {
     var out = '';
     if (u.words && u.words.length) {
-      out += '<h2 class="section-title">🔤 核心词汇</h2><table class="tb"><tr><th>单词</th><th>中文</th><th>小提示</th></tr>';
-      u.words.forEach(function (w) {
-        out += '<tr><td><b>' + esc(w.en) + '</b></td><td>' + esc(w.cn) + '</td><td style="color:var(--ink-2);font-size:14px;">' + esc(w.n || '') + '</td></tr>';
+      out += '<h2 class="section-title">🔤 核心词汇</h2><div class="word-grid">';
+      u.words.forEach(function (w, wi) {
+        out += '<div class="word-chip' + (wi % 2 ? ' alt' : '') + '">' +
+          '<div class="w-en">' + esc(w.en) + '</div>' +
+          '<div class="w-cn">' + esc(w.cn) + '</div>' +
+          (w.n ? '<div class="w-n">💬 ' + esc(w.n) + '</div>' : '') +
+          '</div>';
       });
-      out += '</table>';
+      out += '</div>';
     }
     if (u.sentences && u.sentences.length) {
       out += '<h2 class="section-title">💬 重点句型</h2>';
@@ -554,6 +689,24 @@
         '<div class="ex-d">' + esc(x.d) + '</div>' +
         '</div>';
     });
+    return out;
+  }
+
+  /* ---------- 视频讲解(B站内嵌,懒加载) ---------- */
+  function renderVideos(videos) {
+    var out = '<div class="no-print">' +
+      '<h2 class="section-title">🎬 视频讲解</h2>' +
+      '<p class="video-note">视频来自哔哩哔哩,是公开的课堂教学/微课资源。点击"播放"即可在本页观看;建议家长陪同,个别视频如下架请以课本为准。</p>' +
+      '<div class="video-grid">';
+    videos.forEach(function (v) {
+      out += '<div class="video-card">' +
+        '<div class="v-title">🎥 ' + esc(v.title) + '</div>' +
+        (v.author ? '<div class="v-author">UP主:' + esc(v.author) + '</div>' : '') +
+        '<button class="btn btn-small btn-primary" data-bvid="' + esc(v.bvid) + '">▶ 播放视频</button>' +
+        '<div class="video-frame"></div>' +
+        '</div>';
+    });
+    out += '</div></div>';
     return out;
   }
 
