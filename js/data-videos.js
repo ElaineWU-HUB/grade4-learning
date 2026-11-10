@@ -56,5 +56,34 @@ window.UNIT_VIDEOS = {
   'english-s1-u2': [{ bvid: 'BV1Dm421p7eb', title: 'PEP四下 Unit 3 Weather 课堂实录+课件(董剑老师)', author: '明兰老师' }],
   'english-s1-u3': [{ bvid: 'BV19e4y1e7eA', title: 'PEP四下 Unit 4 At the farm 公开课获奖课(含课件教案)', author: '英语公开课' }],
   'english-s1-u4': [{ bvid: 'BV1Cd4y1y7dU', title: 'PEP四下 Unit 5 My clothes 公开课获奖课(含课件教案)', author: '英语公开课' }],
-  'english-s1-u5': [{ bvid: 'BV1mG4y187Vo', title: 'PEP四下 Unit 6 Shopping 公开课获奖课(含课件教案)', author: '英语公开课' }]
+  'english-s1-u5': [{ bvid: 'BV1mG4y187Vo', title: 'PEP四下 Unit 6 Shopping 公开课获奖课(含课件教案)', author: '英语公开课' }],
+  /* 历史 · 拓展通识 */
+  'history-s0-u0': [{ bvid: 'BV1c442197uw', title: '《汉字的童年》', author: '国家文物局' }],
+  'history-s0-u1': [{ bvid: 'BV1XQSrBaE9u', title: '《米小圈•动画中国史》第二部', author: '80D约定' }],
+  'history-s0-u2': [{ bvid: 'BV13ZpszcEwJ', title: '【全24节】三国故事 适合低龄幼儿了解三国故事 风趣幽默中掌握三国知识', author: '丁一知识宝库' }],
+  'history-s0-u3': [{ bvid: 'BV1go4y1A7EV', title: '【52集全】《西游记的故事》超高清1080P-经典名著启蒙动画片-专为儿童打造!', author: '幼小初高学习资源' }],
+  'history-s1-u0': [{ bvid: 'BV12s421g7nn', title: '虎门销烟:林则徐与鸦片战争的故事', author: '花语故事家' }],
+  'history-s1-u1': [{ bvid: 'BV1hc411J7TY', title: '五四运动:历史书没讲完的,我用动画做给你看!', author: '迷因水母' }],
+  'history-s1-u2': [{ bvid: 'BV12J411u7Xv', title: '【全网最清晰1080P】开国大典彩色修复完整版', author: '浙江共青团' }],
+  /* 地理 · 拓展通识 */
+  'geography-s0-u0': [{ bvid: 'BV1DiHP6SE3L', title: '八年级地理第一课:疆域', author: '阿麦学地理' }],
+  'geography-s0-u1': [{ bvid: 'BV1vK446MEMu', title: '地理·中国篇丨一条视频看懂中国全部地形!三大阶梯、四大高原、四大盆地、三大平原', author: '惊叹号的儿童世界' }],
+  'geography-s0-u2': [{ bvid: 'BV1Xu4y1e7dR', title: '中国地理-黄河与长江的对比', author: '爱瞌睡的喜羊羊' }],
+  'geography-s1-u0': [{ bvid: 'BV1o3411B7yG', title: '[地理小课堂]地球的运动 6分钟看懂地球的自转和公转 日月星辰的东升西落', author: '地理小课堂-' }],
+  'geography-s1-u1': [{ bvid: 'BV1zZnR6yE2M', title: 'AI地理课|《大洲与大洋》', author: 'm奈萌摩尔' }],
+  'geography-s1-u2': [{ bvid: 'BV1XK4y127sJ', title: '一口气讲完世界地理【爆爆|区域地理】', author: '爆爆的计划本' }],
+  /* 人文 · 拓展通识 */
+  'humanities-s0-u0': [{ bvid: 'BV1Fu4y1X7kr', title: '中国情【中国节】儿童节日科普!最适合孩子看的中国传统节日动画!', author: '硕宝硕贝育儿资源' }],
+  'humanities-s0-u1': [{ bvid: 'BV1sxREYgEyS', title: '【古诗里的二十四节气 全24集】趣味动画 科普启蒙', author: '少儿动画学习课堂' }],
+  'humanities-s0-u2': [{ bvid: 'BV19fywYjEGZ', title: '超好吃!八大菜系你尝过哪些?【斑马百科动画】', author: '斑马百科' }],
+  'humanities-s1-u0': [{ bvid: 'BV1qX4y1W7tT', title: '中国非物质文化遗产之传统戏剧京剧科普视频(含京剧唱腔、场面、行当、脸谱)', author: '非遗文化小屋' }],
+  'humanities-s1-u1': [{ bvid: 'BV17Dv9ewES9', title: '(10集全)故宫奇妙游记 孩子喜欢看的动画 学知识', author: '默默爱分享' }],
+  'humanities-s1-u2': [{ bvid: 'BV1EE41127uK', title: '中华传统美德故事 第一部', author: '动画纪' }],
+  /* 科学 · 拓展通识 */
+  'science-s0-u0': [{ bvid: 'BV1k54y167fM', title: '水的三种状态', author: 'Olivia-Shujuan' }],
+  'science-s0-u1': [{ bvid: 'BV1cL411t7YX', title: '苏教版小学科学五年级上册《光的传播》', author: 'shallowdream2018' }],
+  'science-s0-u2': [{ bvid: 'BV1CZkCY3ELy', title: '24 电和磁', author: '科学路老' }],
+  'science-s1-u0': [{ bvid: 'BV1N44y1G7XL', title: '6.植物的繁殖', author: '_WLL_' }],
+  'science-s1-u1': [{ bvid: 'BV1hA4y1X7PW', title: '6分钟看完蚕的一生', author: '庐小金' }],
+  'science-s1-u2': [{ bvid: 'BV1HSPbzjEbW', title: '儿童科普|10分钟看懂太阳系八大行星|小朋友宇宙启蒙动画', author: '小熊猫老师FF' }]
 };
