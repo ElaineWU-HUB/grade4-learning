@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>四年级学习小站 · 语文 数学 英语</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="index.html"><span class="logo">🎒</span> 四年级学习小站</a>
+      <nav class="nav">
+        <a href="index.html" class="active">🏠 首页</a>
+        <a href="learn.html#/chinese">📖 语文</a>
+        <a href="learn.html#/math">🧮 数学</a>
+        <a href="learn.html#/english">🔤 英语</a>
+        <a href="learn.html#/scores">⭐ 我的成绩</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <section class="hero">
+      <div class="mascot-row">
+        <div class="mascot" id="mascot" title="猫头鹰老师">🦉</div>
+        <div class="bubble">
+          <span id="mascotTip">每天进步一点点,星星就会连成片 ⭐</span>
+          <div class="bubble-name">—— 猫头鹰老师</div>
+        </div>
+      </div>
+      <h1>四年级学习小站</h1>
+      <p class="sub">语文 · 数学 · 英语 —— 跟着课本,一个单元一个单元地闯关!</p>
+      <div class="quote-box" id="dailyQuote">
+        <div class="qt">加载中…</div>
+        <div class="ql">—— 每日一句</div>
+      </div>
+    </section>
+
+    <section class="subject-grid" id="subjectCards">
+      <!-- 三科卡片由 js 动态生成,展示学习进度 -->
+    </section>
+
+    <section class="howto no-print">
+      <h2>🚀 怎么使用这个小站?</h2>
+      <div class="howto-grid">
+        <div class="step-card">
+          <span class="n">1</span>
+          <b>选科目</b>
+          <p>点上面的语文、数学或英语,进入对应科目的学习地图。</p>
+        </div>
+        <div class="step-card">
+          <span class="n">2</span>
+          <b>按单元闯关</b>
+          <p>每个单元都有:学习目标、知识点讲解、例题和练习,和课本完全同步。</p>
+        </div>
+        <div class="step-card">
+          <span class="n">3</span>
+          <b>做测验赢星星</b>
+          <p>学完一个单元,做互动小测验拿 ⭐;全对还有撒花奖励!进度会自动保存在这台电脑上。</p>
+        </div>
+        <div class="step-card">
+          <span class="n">4</span>
+          <b>专题复习</b>
+          <p>每个科目还有"专题复习"栏目,把一学年的知识串成体系,期末复习超有用。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="howto no-print">
+      <h2>📚 内容说明</h2>
+      <div class="card" style="font-size:14.5px;color:var(--ink-2);">
+        <p style="margin-top:0;">本网站内容依据<b>义务教育课程标准</b>和以下教材编写,与课本同步:</p>
+        <ul style="margin:6px 0;">
+          <li>📖 语文:统编版(部编版)四年级上、下册</li>
+          <li>🧮 数学:人教版四年级上、下册</li>
+          <li>🔤 英语:人教 PEP(三年级起点)四年级上、下册</li>
+        </ul>
+        <p style="margin-bottom:0;">古诗文原文按课本逐字核对;现代课文只讲解知识点和写法,不整篇转载,请配合课本使用。
+          如发现个别地区教材版本略有不同,以孩子手里的课本为准。</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer no-print">
+    四年级学习小站 · 每天进步一点点,星星就会连成片 ⭐<br>
+    学习进度保存在本机浏览器中,不会上传到任何地方。
+  </footer>
+
+  <script src="js/data-chinese.js"></script>
+  <script src="js/data-math.js"></script>
+  <script src="js/data-english.js"></script>
+  <script src="js/data-extras.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // 首页专用逻辑:三科卡片 + 每日一句
+    App.initHome && App.initHome();
+  </script>
+</body>
+</html>
