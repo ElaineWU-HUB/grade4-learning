@@ -1062,6 +1062,19 @@
       });
       if (it.yi) out += '<div class="rd-yi"><b>📜 白话译文</b>' + (Array.isArray(it.yi) ? it.yi.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') : esc(it.yi)) + '</div>';
       out += '<div class="rd-guide"><b>🧭 导读</b>' + esc(it.guide) + '</div>';
+      if (it.video && it.video.length) {
+        out += '<div class="rd-video no-print"><b>🎬 视频讲解</b>' +
+          '<p class="rd-video-note">点击"播放"即可在本页观看;视频为B站公开资源,个别字句与原文如有出入,以本站文字为准。</p>';
+        it.video.forEach(function (v) {
+          out += '<div class="video-card">' +
+            '<div class="v-title">🎥 ' + esc(v.title) + '</div>' +
+            (v.author ? '<div class="v-author">UP主:' + esc(v.author) + '</div>' : '') +
+            '<button class="btn btn-small btn-primary" type="button" data-bvid="' + esc(v.bvid) + '">▶ 播放视频</button>' +
+            '<div class="video-frame"></div>' +
+            '</div>';
+        });
+        out += '</div>';
+      }
       if (it.qs && it.qs.length) {
         out += '<div class="think-box"><b>💭 今日思考</b>';
         it.qs.forEach(function (qq, qi) {
@@ -1116,6 +1129,19 @@
       btnDone.disabled = true;
       var st = document.getElementById('readStat');
       if (st) st.textContent = '累计打卡 ' + Object.keys(log2).length + ' 天';
+    });
+    // 视频播放按钮(点击后内嵌B站播放器)
+    app.querySelectorAll('[data-bvid]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var card = btn.closest('.video-card');
+        var frame = card ? card.querySelector('.video-frame') : null;
+        if (!frame) return;
+        btn.remove();
+        frame.innerHTML =
+          '<iframe src="https://player.bilibili.com/player.html?bvid=' +
+          encodeURIComponent(btn.getAttribute('data-bvid')) +
+          '&page=1&high_quality=1&danmaku=0" scrolling="no" allowfullscreen="true"></iframe>';
+      });
     });
     // 思考提示
     app.querySelectorAll('.tq-hint').forEach(function (b) {
