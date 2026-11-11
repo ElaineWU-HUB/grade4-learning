@@ -630,6 +630,11 @@ table.tb tbody tr:hover { background: #fffcf3; }
   background: var(--subj-soft, #fff4e6); border-radius: 12px;
   padding: 12px 16px; margin: 14px 0; font-size: 14.5px; line-height: 1.9; color: #6b5433;
 }
+.rd-video { margin: 14px 0 4px; font-size: 15px; }
+.rd-video > b { display: block; margin-bottom: 4px; }
+.rd-video-note { font-size: 13px; color: var(--ink-2); margin: 0 0 10px; }
+.rd-video .video-card { margin-bottom: 12px; animation: none; }
+.rd-video .video-card:last-child { margin-bottom: 0; }
 .think-box {
   border-top: 2px dashed var(--line); margin-top: 14px; padding-top: 12px;
   font-size: 15px; color: var(--ink);
