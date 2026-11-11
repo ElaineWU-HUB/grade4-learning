@@ -1060,7 +1060,7 @@
       it.paras.forEach(function (para) {
         out += '<p class="rd-text">' + esc(para) + '</p>';
       });
-      if (it.yi) out += '<div class="rd-yi"><b>📜 白话译文</b>' + esc(it.yi) + '</div>';
+      if (it.yi) out += '<div class="rd-yi"><b>📜 白话译文</b>' + (Array.isArray(it.yi) ? it.yi.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') : esc(it.yi)) + '</div>';
       out += '<div class="rd-guide"><b>🧭 导读</b>' + esc(it.guide) + '</div>';
       if (it.qs && it.qs.length) {
         out += '<div class="think-box"><b>💭 今日思考</b>';
@@ -1079,7 +1079,7 @@
       '<a href="#/chinese">语文</a><span class="sep">›</span>每日一读</div>' +
       '<h1 class="page-title">📖 每日一读</h1>' +
       '<p class="page-sub">每天一篇经典散文或小古文,读一读、想一想,语感就是这样积累起来的!</p>' +
-      '<div class="oly-note" style="margin-bottom:16px;">🛡️ 选文说明:全部选自已进入<b>公有领域</b>的名家名篇(作者逝世均超过50年)或古代作品,均为节选;引文已逐句核对通行版本,出处见每篇署名,可对照原书阅读。</div>' +
+      '<div class="oly-note" style="margin-bottom:16px;">🛡️ 选文说明:全部选自已进入<b>公有领域</b>的名家名篇(作者逝世均超过50年)或古代作品,均为<b>全文</b>、非节选;原文已逐句核对通行版本,出处见每篇署名,可对照原书阅读。</div>' +
       '<h2 class="section-title">🌟 今日推荐 · ' + todayStr() + '</h2>' +
       '<div class="daily-card" id="todayArticle">' + articleHTML(list[idx], idx, true) +
         '<div class="daily-actions no-print">' +
