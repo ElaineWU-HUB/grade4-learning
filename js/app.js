@@ -278,7 +278,10 @@
       }
       html += '</div></div>';
     });
-    html += '<a class="side-link" href="#/scores"><span class="sl-ico">⭐</span><span>我的成绩</span></a>' +
+    html += '<a class="side-link" id="sideRead" href="#/chinese/reading"><span class="sl-ico">📖</span><span>每日一读</span></a>' +
+      '<a class="side-link" id="sideCalc" href="#/math/calc"><span class="sl-ico">🧮</span><span>每日计算</span></a>' +
+      '<a class="side-link" id="sideListen" href="#/english/listening"><span class="sl-ico">🎧</span><span>每日听力</span></a>' +
+      '<a class="side-link" href="#/scores"><span class="sl-ico">⭐</span><span>我的成绩</span></a>' +
       '<a class="side-link" href="#/math/game"><span class="sl-ico">🏎️</span><span>口算大挑战</span></a>';
     nav.innerHTML = html;
 
@@ -294,6 +297,7 @@
   function updateSidebar(r) {
     var outline = document.getElementById('sideOutline');
     document.querySelectorAll('#sideNav .side-unit').forEach(function (a) { a.classList.remove('on'); });
+    document.querySelectorAll('#sideNav .side-link').forEach(function (a) { a.classList.remove('on'); });
     if (r.view === 'unit') {
       var sel = '#sideNav a[href="#/' + r.subj + '/s' + r.sem + '/u' + r.unit + '"]';
       var link = document.querySelector(sel);
@@ -304,38 +308,48 @@
         var semBox = link.closest('.side-sem-group');
         if (semBox) semBox.classList.add('open');
       }
-      var app = document.getElementById('app');
-      if (outline && app) {
-        var titles = app.querySelectorAll('h2.section-title');
-        var html = '<div class="outline-t">📑 本页书签</div>';
-        titles.forEach(function (h, i) {
-          h.id = 'sec' + i;
-          html += '<a class="outline-item" data-target="sec' + i + '">' +
-            '<span class="o-n">' + (i + 1) + '</span><span class="o-t">' + esc(h.textContent) + '</span></a>';
-        });
-        outline.innerHTML = titles.length ? html : '';
-        outline.querySelectorAll('.outline-item').forEach(function (a) {
-          a.addEventListener('click', function () {
-            var el = document.getElementById(a.getAttribute('data-target'));
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            document.body.classList.remove('side-open');
-          });
-        });
+    } else {
+      var dailyId = { reading: 'sideRead', calc: 'sideCalc', listening: 'sideListen' }[r.view];
+      if (dailyId) {
+        var dl = document.getElementById(dailyId);
+        if (dl) dl.classList.add('on');
       }
-    } else if (outline) {
-      outline.innerHTML = '';
+    }
+
+    // 本页书签:任何页面只要有 h2.section-title 就生成
+    var app = document.getElementById('app');
+    if (outline && app) {
+      var titles = app.querySelectorAll('h2.section-title');
+      var html = '<div class="outline-t">📑 本页书签</div>';
+      titles.forEach(function (h, i) {
+        h.id = 'sec' + i;
+        html += '<a class="outline-item" data-target="sec' + i + '">' +
+          '<span class="o-n">' + (i + 1) + '</span><span class="o-t">' + esc(h.textContent) + '</span></a>';
+      });
+      outline.innerHTML = titles.length ? html : '';
+      outline.querySelectorAll('.outline-item').forEach(function (a) {
+        a.addEventListener('click', function () {
+          var el = document.getElementById(a.getAttribute('data-target'));
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.body.classList.remove('side-open');
+        });
+      });
     }
   }
 
   function parseHash() {
     // #/subject[/sN[/uN]]  #/subject/tN  #/scores  #/math/game
+    // #/chinese/reading  #/math/calc  #/english/listening
     var h = location.hash.replace(/^#\/?/, '');
     var parts = h.split('/').filter(Boolean);
     if (!parts.length) return { view: 'home' };
     if (parts[0] === 'scores') return { view: 'scores' };
     var subj = parts[0];
     if (SUBJECTS[subj]) {
-      if (parts[1] === 'game') return { view: 'game', subj: subj };
+      if (parts[1] === 'game' && subj === 'math') return { view: 'game', subj: subj };
+      if (parts[1] === 'reading' && subj === 'chinese') return { view: 'reading', subj: subj };
+      if (parts[1] === 'calc' && subj === 'math') return { view: 'calc', subj: subj };
+      if (parts[1] === 'listening' && subj === 'english') return { view: 'listening', subj: subj };
       if (parts[1] && parts[1][0] === 't') return { view: 'topic', subj: subj, topic: +parts[1].slice(1) };
       if (parts[1] && parts[1][0] === 's') {
         var sem = +parts[1].slice(1);
@@ -380,6 +394,9 @@
       case 'semester': renderSemester(app, r.subj, r.sem); break;
       case 'unit': renderUnit(app, r.subj, r.sem, r.unit); break;
       case 'topic': renderTopic(app, r.subj, r.topic); break;
+      case 'reading': renderDailyReading(app); break;
+      case 'calc': renderDailyCalc(app); break;
+      case 'listening': renderDailyListening(app); break;
     }
     updateSidebar(r);
     window.scrollTo(0, 0);
@@ -467,6 +484,26 @@
         '<span class="state">开始 ›</span></a>'
       : '';
 
+    var dailyHTML = subjId === 'chinese'
+      ? '<h2 class="section-title">📅 每日积累</h2>' +
+        '<a class="unit-card" href="#/chinese/reading">' +
+        '<span class="no">📖</span>' +
+        '<span class="info"><b>每日一读</b><span>每天一篇经典散文或小古文,积累语感!</span></span>' +
+        '<span class="state">去读 ›</span></a>'
+      : subjId === 'math'
+      ? '<h2 class="section-title">📅 每日练习</h2>' +
+        '<a class="unit-card" href="#/math/calc">' +
+        '<span class="no">🧮</span>' +
+        '<span class="info"><b>每日计算 20 题</b><span>每天一页口算练习,夯实计算基本功!</span></span>' +
+        '<span class="state">去算 ›</span></a>'
+      : subjId === 'english'
+      ? '<h2 class="section-title">📅 每日听说</h2>' +
+        '<a class="unit-card" href="#/english/listening">' +
+        '<span class="no">🎧</span>' +
+        '<span class="info"><b>每日听力</b><span>每天一篇英语短文,人声朗读,边听边读!</span></span>' +
+        '<span class="state">去听 ›</span></a>'
+      : '';
+
     var reading = (window.READING || {})[subjId] || [];
     var readingHTML = reading.length
       ? '<h2 class="section-title">📚 课外阅读推荐</h2>' +
@@ -487,6 +524,7 @@
       unitListHTML(subjId, semIdx) +
       '<h2 class="section-title">🧩 专题复习(体系化知识)</h2>' +
       '<div class="unit-list">' + topicCards + '</div>' +
+      dailyHTML +
       gameHTML +
       readingHTML
     );
@@ -981,6 +1019,434 @@
     list.querySelectorAll('.fill-input').forEach(function (i2) { i2.classList.remove('correct', 'wrong'); });
     list.querySelectorAll('.explain').forEach(function (e) { e.classList.remove('show'); });
     list.querySelectorAll('.result-badge').forEach(function (b) { b.remove(); });
+  }
+
+  /* ============================================================
+     每日一读 / 每日计算 / 每日听力
+     ============================================================ */
+  function dayNumber() {
+    var n = new Date();
+    return n.getFullYear() * 372 + (n.getMonth() + 1) * 31 + n.getDate();
+  }
+  function todayKey() {
+    var n = new Date();
+    return n.getFullYear() + '-' + (n.getMonth() + 1) + '-' + n.getDate();
+  }
+  function todayStr() {
+    var n = new Date();
+    var wd = ['日', '一', '二', '三', '四', '五', '六'][n.getDay()];
+    return n.getFullYear() + '年' + (n.getMonth() + 1) + '月' + n.getDate() + '日 星期' + wd;
+  }
+
+  /* ---------- 📖 每日一读 ---------- */
+  function renderDailyReading(app) {
+    var s = SUBJECTS.chinese;
+    document.body.style.setProperty('--subj', s.color);
+    document.body.style.setProperty('--subj-soft', s.soft);
+    var list = window.DAILY_READING || [];
+    if (!list.length) { app.innerHTML = '<p>内容加载中…</p>'; return; }
+    var idx = dayNumber() % list.length;
+    var p = loadProgress();
+    var log = p['reading-log'] || {};
+    var key = todayKey();
+    var checked = log[key] === idx;
+
+    function articleHTML(it, i, showCheck) {
+      var out = '<div class="rd-head">' +
+        '<div class="rd-title">' + esc(it.title) + '</div>' +
+        '<div class="rd-author">✍️ ' + esc(it.author) + '(' + esc(it.years) + ')　·　出自 ' + esc(it.from) + '</div>' +
+        '<span class="rd-tag">' + esc(it.tag) + '</span>' +
+        '</div>';
+      it.paras.forEach(function (para) {
+        out += '<p class="rd-text">' + esc(para) + '</p>';
+      });
+      if (it.yi) out += '<div class="rd-yi"><b>📜 白话译文</b>' + esc(it.yi) + '</div>';
+      out += '<div class="rd-guide"><b>🧭 导读</b>' + esc(it.guide) + '</div>';
+      if (it.qs && it.qs.length) {
+        out += '<div class="think-box"><b>💭 今日思考</b>';
+        it.qs.forEach(function (qq, qi) {
+          out += '<div class="think-q"><span class="tq-n">' + (qi + 1) + '</span>' +
+            '<span class="tq-t">' + esc(qq.q) + '</span>' +
+            '<button class="tq-hint" type="button" data-hint="' + esc(qq.hint) + '">💡 提示</button></div>';
+        });
+        out += '</div>';
+      }
+      return out;
+    }
+
+    var html =
+      '<div class="breadcrumb"><a href="index.html">首页</a><span class="sep">›</span>' +
+      '<a href="#/chinese">语文</a><span class="sep">›</span>每日一读</div>' +
+      '<h1 class="page-title">📖 每日一读</h1>' +
+      '<p class="page-sub">每天一篇经典散文或小古文,读一读、想一想,语感就是这样积累起来的!</p>' +
+      '<div class="oly-note" style="margin-bottom:16px;">🛡️ 选文说明:全部选自已进入<b>公有领域</b>的名家名篇(作者逝世均超过50年)或古代作品,均为节选;引文已逐句核对通行版本,出处见每篇署名,可对照原书阅读。</div>' +
+      '<h2 class="section-title">🌟 今日推荐 · ' + todayStr() + '</h2>' +
+      '<div class="daily-card" id="todayArticle">' + articleHTML(list[idx], idx, true) +
+        '<div class="daily-actions no-print">' +
+          '<button class="btn btn-primary" id="btnReadDone">' + (checked ? '✅ 今日已打卡' : '✅ 读完了,打卡!') + '</button>' +
+          '<span class="daily-stat" id="readStat">累计打卡 ' + Object.keys(log).length + ' 天</span>' +
+        '</div>' +
+      '</div>' +
+      '<h2 class="section-title">📚 全部篇目(' + list.length + ' 篇)</h2>' +
+      '<div class="acc-list">' +
+      list.map(function (it, i) {
+        return '<div class="acc-item' + (i === idx ? ' is-today' : '') + '">' +
+          '<button class="acc-head" type="button" data-i="' + i + '">' +
+            '<span class="acc-ico">' + (i === idx ? '⭐' : '📄') + '</span>' +
+            '<span class="acc-name">' + esc(it.title.replace(/\([^)]*\)/g, '')) + '</span>' +
+            '<span class="acc-meta">' + esc(it.author) + ' · ' + esc(it.tag) + '</span>' +
+            '<span class="caret">▾</span>' +
+          '</button>' +
+          '<div class="acc-body">' + articleHTML(it, i, false) + '</div>' +
+        '</div>';
+      }).join('') +
+      '</div>';
+
+    app.innerHTML = html;
+
+    // 打卡
+    var btnDone = document.getElementById('btnReadDone');
+    if (btnDone) btnDone.addEventListener('click', function () {
+      var p2 = loadProgress();
+      var log2 = p2['reading-log'] || {};
+      log2[key] = idx;
+      p2['reading-log'] = log2;
+      saveProgress(p2);
+      btnDone.textContent = '✅ 今日已打卡';
+      btnDone.disabled = true;
+      var st = document.getElementById('readStat');
+      if (st) st.textContent = '累计打卡 ' + Object.keys(log2).length + ' 天';
+    });
+    // 思考提示
+    app.querySelectorAll('.tq-hint').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var hint = b.getAttribute('data-hint');
+        b.classList.add('showed');
+        b.textContent = '💡 ' + hint;
+        b.disabled = true;
+      });
+    });
+    // 全部篇目手风琴
+    app.querySelectorAll('.acc-head').forEach(function (h) {
+      h.addEventListener('click', function () {
+        h.parentElement.classList.toggle('open');
+      });
+    });
+  }
+
+  /* ---------- 🧮 每日计算 ---------- */
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function makeCalcProblems(seed) {
+    var rnd = mulberry32(seed);
+    var rint = function (lo, hi) { return lo + Math.floor(rnd() * (hi - lo + 1)); };
+    var probs = [];
+    var i, a, b, t;
+    for (i = 0; i < 5; i++) { // 万以内加法
+      a = rint(1000, 9999); b = rint(100, 9999 - a);
+      probs.push({ q: a + ' + ' + b + ' =', a: String(a + b) });
+    }
+    for (i = 0; i < 3; i++) { // 万以内减法
+      a = rint(1000, 9999); b = rint(100, a - 1);
+      probs.push({ q: a + ' − ' + b + ' =', a: String(a - b) });
+    }
+    for (i = 0; i < 4; i++) { // 两位数 × 一位数
+      a = rint(12, 99); b = rint(3, 9);
+      probs.push({ q: a + ' × ' + b + ' =', a: String(a * b) });
+    }
+    for (i = 0; i < 3; i++) { // 三位数 ÷ 一位数(保证整除)
+      b = rint(3, 9); a = rint(100, 999) * b;
+      probs.push({ q: a + ' ÷ ' + b + ' =', a: String(a / b) });
+    }
+    for (i = 0; i < 2; i++) { // 两位数 × 整十
+      a = rint(12, 99); b = rint(2, 9) * 10;
+      probs.push({ q: a + ' × ' + b + ' =', a: String(a * b) });
+    }
+    b = rint(2, 9) * 10; a = rint(3, 9) * b * 10; // 整百 ÷ 整十
+    probs.push({ q: a + ' ÷ ' + b + ' =', a: String(a / b) });
+    for (i = 0; i < 2; i++) { // 一位小数加减
+      var x1 = rint(10, 99) / 10, x2 = rint(10, 99) / 10;
+      if (i === 1) {
+        if (x2 > x1) { t = x1; x1 = x2; x2 = t; }
+        probs.push({ q: x1.toFixed(1) + ' − ' + x2.toFixed(1) + ' =', a: (x1 - x2).toFixed(1) });
+      } else {
+        probs.push({ q: x1.toFixed(1) + ' + ' + x2.toFixed(1) + ' =', a: (x1 + x2).toFixed(1) });
+      }
+    }
+    return probs; // 共 20 题
+  }
+
+  function renderDailyCalc(app) {
+    var s = SUBJECTS.math;
+    document.body.style.setProperty('--subj', s.color);
+    document.body.style.setProperty('--subj-soft', s.soft);
+    var seed = dayNumber();
+    var p = loadProgress();
+    var bestKey = 'calc-' + seed;
+    var best = p[bestKey];
+    var startTime = Date.now();
+    var probs = makeCalcProblems(seed);
+    var isDaily = true;
+
+    function gridHTML(ps) {
+      return '<div class="calc-grid" id="calcGrid">' +
+        ps.map(function (pr, i) {
+          return '<div class="calc-item" data-i="' + i + '">' +
+            '<span class="c-q">' + (i + 1) + '. ' + esc(pr.q) + '</span>' +
+            '<input class="c-in" type="text" inputmode="decimal" placeholder="?" autocomplete="off"></div>';
+        }).join('') +
+        '</div>';
+    }
+
+    function grade() {
+      var grid = document.getElementById('calcGrid');
+      if (!grid) return;
+      grid.querySelectorAll('.c-a').forEach(function (x) { x.remove(); });
+      var correct = 0;
+      grid.querySelectorAll('.calc-item').forEach(function (item, i) {
+        var inp = item.querySelector('.c-in');
+        var ok = inp.value.trim() !== '' && Number(inp.value.trim()) === Number(probs[i].a);
+        item.classList.remove('ok', 'no');
+        item.classList.add(ok ? 'ok' : 'no');
+        if (!ok) {
+          var ans = document.createElement('span');
+          ans.className = 'c-a';
+          ans.textContent = '✓ ' + probs[i].a;
+          item.appendChild(ans);
+        } else correct++;
+      });
+      var secs = Math.round((Date.now() - startTime) / 1000);
+      var res = document.getElementById('calcResult');
+      if (isDaily) {
+        var better = !best || correct > best.score || (correct === best.score && secs < best.time);
+        if (better) { p[bestKey] = { score: correct, time: secs }; saveProgress(p); best = p[bestKey]; }
+        var gradeHTML = '<div class="quiz-score">' +
+          (correct === probs.length ? '🎉 全部答对,计算小达人!' : correct >= 12 ? '👍 不错哦!' : '💪 加油,多多练习!') + '<br>' +
+          '<div class="big">' + correct + ' / ' + probs.length + '</div>' +
+          '用时 ' + secs + ' 秒' +
+          (better ? ' · 🏅 刷新今日最佳!' : (best ? ' · 今日最佳 ' + best.score + '/' + probs.length + '(' + best.time + '秒)' : '')) +
+          '</div>';
+        if (correct === probs.length) confetti();
+        res.innerHTML = gradeHTML;
+      } else {
+        res.innerHTML = '<div class="quiz-score">自由练习:答对 ' + correct + ' / ' + probs.length + '(不计入今日成绩)</div>';
+      }
+      res.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    var html =
+      '<div class="breadcrumb"><a href="index.html">首页</a><span class="sep">›</span>' +
+      '<a href="#/math">数学</a><span class="sep">›</span>每日计算</div>' +
+      '<h1 class="page-title">🧮 每日计算</h1>' +
+      '<p class="page-sub">每天 20 道口算题:万以内加减、乘除法、整十整百、小数加减。限时挑战,刷新每日最佳!</p>' +
+      '<div class="daily-actions no-print" style="margin-bottom:12px;">' +
+        '<button class="btn btn-primary" id="btnCalcGrade">📝 提交批改</button>' +
+        '<button class="btn btn-ghost" id="btnCalcReset">🔄 重新做一遍</button>' +
+        '<button class="btn btn-ghost" id="btnCalcNew">🎲 换一批题</button>' +
+        '<button class="btn btn-ghost" id="btnCalcPrint">🖨️ 打印</button>' +
+        '<span class="daily-stat" id="calcStat">' +
+          (best ? '🏅 今日最佳:' + best.score + '/20(' + best.time + '秒)' : '🏅 今日还没挑战') +
+          ' · ' + todayStr() + '</span>' +
+      '</div>' +
+      gridHTML(probs) +
+      '<div id="calcResult"></div>';
+
+    app.innerHTML = html;
+
+    document.getElementById('btnCalcGrade').addEventListener('click', grade);
+    document.getElementById('btnCalcReset').addEventListener('click', function () {
+      startTime = Date.now();
+      document.querySelectorAll('#calcGrid .c-in').forEach(function (inp) { inp.value = ''; });
+      document.querySelectorAll('#calcGrid .calc-item').forEach(function (it) { it.classList.remove('ok', 'no'); });
+      document.querySelectorAll('#calcGrid .c-a').forEach(function (x) { x.remove(); });
+      document.getElementById('calcResult').innerHTML = '';
+    });
+    document.getElementById('btnCalcNew').addEventListener('click', function () {
+      startTime = Date.now();
+      isDaily = false;
+      probs = makeCalcProblems(Date.now() % 2147483647);
+      document.getElementById('calcGrid').outerHTML = gridHTML(probs);
+      document.getElementById('calcResult').innerHTML = '';
+      document.getElementById('calcStat').textContent = '🎲 自由练习(不计入今日成绩) · ' + todayStr();
+    });
+    document.getElementById('btnCalcPrint').addEventListener('click', function () { window.print(); });
+    document.querySelectorAll('#calcGrid .c-in').forEach(function (inp) {
+      inp.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          var items = document.querySelectorAll('#calcGrid .calc-item');
+          var cur = +inp.closest('.calc-item').dataset.i;
+          var next = items[cur + 1];
+          if (next) next.querySelector('.c-in').focus();
+          else grade();
+        }
+      });
+    });
+  }
+
+  /* ---------- 🎧 每日听力 ---------- */
+  var voicesCache = null;
+  if (window.speechSynthesis && window.speechSynthesis.getVoices) {
+    voicesCache = window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = function () {
+      voicesCache = window.speechSynthesis.getVoices();
+    };
+  }
+  function pickEnglishVoice() {
+    var vs = voicesCache || [];
+    var en = vs.filter(function (v) { return v.lang && v.lang.toLowerCase().indexOf('en') === 0; });
+    if (!en.length) return null;
+    return en.find(function (v) { return /Samantha|Google US English|Ava|Allison|Zira|Female|Siri/i.test(v.name); }) || en[0];
+  }
+  function speakText(text, rate) {
+    if (!window.speechSynthesis) {
+      alert('这个浏览器不支持语音朗读,请换 Safari 或 Chrome 试试。');
+      return false;
+    }
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US';
+    u.rate = rate || 0.85;
+    var v = pickEnglishVoice();
+    if (v) u.voice = v;
+    window.speechSynthesis.speak(u);
+    return true;
+  }
+
+  function renderDailyListening(app) {
+    var s = SUBJECTS.english;
+    document.body.style.setProperty('--subj', s.color);
+    document.body.style.setProperty('--subj-soft', s.soft);
+    var list = window.DAILY_LISTENING || [];
+    if (!list.length) { app.innerHTML = '<p>内容加载中…</p>'; return; }
+    var idx = dayNumber() % list.length;
+    var item = list[idx];
+    var p = loadProgress();
+    var log = p['listen-log'] || {};
+    var key = todayKey();
+    var checked = log[key] === idx;
+    var rate = 0.85;
+
+    var html =
+      '<div class="breadcrumb"><a href="index.html">首页</a><span class="sep">›</span>' +
+      '<a href="#/english">英语</a><span class="sep">›</span>每日听力</div>' +
+      '<h1 class="page-title">🎧 每日听力</h1>' +
+      '<p class="page-sub">每天一篇英语短文,点按钮听人声朗读;先听一遍,再跟读一遍,耳朵和嘴巴一起练!</p>' +
+      '<div class="ls-toolbar no-print">' +
+        '<button class="btn btn-primary" id="btnSpeakAll">🔊 朗读全文</button>' +
+        '<button class="btn btn-ghost" id="btnStop">⏹ 停止</button>' +
+        '<button class="btn btn-ghost" id="btnSlow">🐢 慢速</button>' +
+        '<button class="btn btn-ghost" id="btnNormal">🐇 常速</button>' +
+        '<button class="btn btn-ghost" id="btnShowZh">📖 中文译文</button>' +
+      '</div>' +
+      '<h2 class="section-title">🌟 今日短文 · ' + todayStr() + '</h2>' +
+      '<div class="daily-card">' +
+        '<div class="rd-head">' +
+          '<div class="rd-title">' + esc(item.title) + '</div>' +
+          '<span class="rd-tag" style="background:var(--subj-soft,#ebfbee);color:var(--subj,#2f9e44);">' + esc(item.tag) + '</span>' +
+        '</div>' +
+        '<div class="listen-text">' +
+          item.text.map(function (para) {
+            return '<p class="ls-para" data-t="' + esc(para) + '" title="点击朗读这一句">' + esc(para) + '</p>';
+          }).join('') +
+        '</div>' +
+        '<div class="ls-zh" id="lsZh"><b>📖 中文译文</b>' + esc(item.zh) + '</div>' +
+        (item.words && item.words.length
+          ? '<div class="word-chips">' + item.words.map(function (w) {
+              return '<span class="wc"><b>' + esc(w.w) + '</b> ' + esc(w.m) + '</span>';
+            }).join('') + '</div>'
+          : '') +
+        '<h3 class="ls-sub">📝 听力小检测</h3>' +
+        '<div id="listenQuiz"></div>' +
+        '<div class="daily-actions no-print">' +
+          '<button class="btn btn-primary" id="btnListenDone">' + (checked ? '✅ 今日已打卡' : '✅ 听完了,打卡!') + '</button>' +
+          '<span class="daily-stat" id="listenStat">累计打卡 ' + Object.keys(log).length + ' 天</span>' +
+        '</div>' +
+      '</div>' +
+      '<h2 class="section-title">📚 全部短文(' + list.length + ' 篇)</h2>' +
+      '<div class="acc-list">' +
+      list.map(function (it, i) {
+        return '<div class="acc-item' + (i === idx ? ' is-today' : '') + '">' +
+          '<button class="acc-head" type="button" data-i="' + i + '">' +
+            '<span class="acc-ico">' + (i === idx ? '⭐' : '🎧') + '</span>' +
+            '<span class="acc-name">' + esc(it.title) + '</span>' +
+            '<span class="acc-meta">' + esc(it.tag) + '</span>' +
+            '<span class="caret">▾</span>' +
+          '</button>' +
+          '<div class="acc-body">' +
+            '<button class="btn btn-small btn-ghost acc-play" data-t="' + esc(it.text.join(' ')) + '">🔊 朗读</button>' +
+            '<div class="listen-text">' + it.text.map(function (para) {
+              return '<p class="ls-para" data-t="' + esc(para) + '" title="点击朗读这一句">' + esc(para) + '</p>';
+            }).join('') + '</div>' +
+            '<div class="ls-zh"><b>📖 中文译文</b>' + esc(it.zh) + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('') +
+      '</div>';
+
+    app.innerHTML = html;
+
+    // 语音
+    document.getElementById('btnSpeakAll').addEventListener('click', function () {
+      speakText(item.text.join(' '), rate);
+    });
+    document.getElementById('btnStop').addEventListener('click', function () {
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+    });
+    document.getElementById('btnSlow').addEventListener('click', function () {
+      rate = 0.7;
+      alert('已切换慢速(0.7倍),适合跟读。');
+    });
+    document.getElementById('btnNormal').addEventListener('click', function () {
+      rate = 0.9;
+      alert('已切换常速。');
+    });
+    document.getElementById('btnShowZh').addEventListener('click', function () {
+      document.getElementById('lsZh').classList.toggle('show');
+    });
+    app.querySelectorAll('.ls-para').forEach(function (para) {
+      para.addEventListener('click', function () {
+        speakText(para.getAttribute('data-t'), rate);
+      });
+    });
+    app.querySelectorAll('.acc-play').forEach(function (b) {
+      b.addEventListener('click', function (e) {
+        e.stopPropagation();
+        speakText(b.getAttribute('data-t'), rate);
+      });
+    });
+
+    // 听力小检测(练习模式,逐题对答案,不计分不存档)
+    var quizArea = document.getElementById('listenQuiz');
+    if (quizArea && item.quiz && item.quiz.length) {
+      initQuizArea(quizArea, item.quiz, 'english', 0, 0, 'practice');
+    }
+
+    // 打卡
+    document.getElementById('btnListenDone').addEventListener('click', function () {
+      var p2 = loadProgress();
+      var log2 = p2['listen-log'] || {};
+      log2[key] = idx;
+      p2['listen-log'] = log2;
+      saveProgress(p2);
+      var b = document.getElementById('btnListenDone');
+      b.textContent = '✅ 今日已打卡';
+      b.disabled = true;
+      var st = document.getElementById('listenStat');
+      if (st) st.textContent = '累计打卡 ' + Object.keys(log2).length + ' 天';
+    });
+
+    // 手风琴
+    app.querySelectorAll('.acc-head').forEach(function (h) {
+      h.addEventListener('click', function () {
+        h.parentElement.classList.toggle('open');
+      });
+    });
   }
 
   /* ============================================================
