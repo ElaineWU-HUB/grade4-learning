@@ -492,6 +492,13 @@ table.tb tbody tr:hover { background: #fffcf3; }
   background: #f5f0e2; border-radius: 9px;
 }
 .side-link:hover { transform: translateX(4px); box-shadow: var(--shadow-lg); }
+.side-link.on {
+  color: #fff;
+  background: linear-gradient(135deg, var(--subj, #e8c766), var(--subj, #e8c766));
+  border: 2px solid var(--subj, #e8c766);
+  padding: 7px 10px;
+}
+.side-link.on .sl-ico { background: rgba(255, 255, 255, .25); }
 
 /* 学科分组卡片:顶部科目色条 + 圆角卡片 */
 .side-group {
@@ -586,6 +593,133 @@ table.tb tbody tr:hover { background: #fffcf3; }
   border: 2px dashed #e8c766; border-radius: 14px;
   padding: 12px 16px; margin-bottom: 14px;
   font-size: 14.5px; color: #6b5b2e; line-height: 1.9;
+}
+
+/* ============================================================
+   每日一读 / 每日计算 / 每日听力
+   ============================================================ */
+.daily-card {
+  background: #fff; border-radius: 20px; padding: 22px 24px;
+  box-shadow: var(--shadow); border: 1px solid var(--line);
+  margin-bottom: 20px;
+}
+.daily-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 16px; }
+.daily-stat { font-size: 13.5px; color: var(--ink-2); font-weight: 700; }
+
+/* --- 📖 每日一读 --- */
+.rd-head { margin-bottom: 14px; }
+.rd-title { font-size: 24px; font-weight: 800; color: var(--subj, #e8590c); margin-bottom: 6px; }
+.rd-author { font-size: 13.5px; color: var(--ink-2); margin-bottom: 8px; }
+.rd-tag {
+  display: inline-block; font-size: 12.5px; font-weight: 800;
+  background: var(--subj-soft, #fff4e6); color: var(--subj, #e8590c);
+  border-radius: 999px; padding: 4px 12px;
+}
+.rd-text {
+  font-family: 'Songti SC', 'STSong', 'SimSun', 'Noto Serif SC', serif;
+  font-size: 17.5px; line-height: 2.1; color: #3b3628;
+  margin: 0 0 12px; text-align: justify;
+}
+.rd-yi {
+  background: #f6fbf2; border: 1px dashed #9ccf8f; border-radius: 12px;
+  padding: 12px 16px; margin: 14px 0; font-size: 15px; line-height: 1.9; color: #3f5138;
+}
+.rd-guide {
+  background: var(--subj-soft, #fff4e6); border-radius: 12px;
+  padding: 12px 16px; margin: 14px 0; font-size: 14.5px; line-height: 1.9; color: #6b5433;
+}
+.think-box {
+  border-top: 2px dashed var(--line); margin-top: 14px; padding-top: 12px;
+  font-size: 15px; color: var(--ink);
+}
+.think-q { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+.tq-n {
+  flex: none; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--subj, #e8590c); color: #fff; font-weight: 800;
+  display: grid; place-items: center; font-size: 13px;
+}
+.tq-t { flex: 1; }
+.tq-hint {
+  flex: none; border: 2px solid var(--subj, #e8590c); color: var(--subj, #e8590c);
+  background: #fff; border-radius: 999px; padding: 4px 12px;
+  font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer;
+}
+.tq-hint:hover { background: var(--subj-soft, #fff4e6); }
+.tq-hint.showed {
+  border-style: dashed; border-color: var(--line); color: var(--ink-2);
+  background: #faf6ea; max-width: 280px; white-space: normal; line-height: 1.5;
+}
+
+/* 手风琴(全部篇目 / 全部短文) */
+.acc-list { display: grid; gap: 10px; }
+.acc-item {
+  background: #fff; border-radius: 14px; border: 1px solid var(--line);
+  box-shadow: var(--shadow); overflow: hidden;
+}
+.acc-item.is-today { border: 2px solid var(--subj, #e8c766); }
+.acc-head {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 12px 16px; border: none; background: none;
+  font-family: inherit; font-size: 15px; font-weight: 800; color: var(--ink);
+  cursor: pointer; text-align: left;
+}
+.acc-head:hover { background: #fbf8ef; }
+.acc-ico { font-size: 16px; }
+.acc-name { flex: none; }
+.acc-meta { flex: 1; font-size: 12.5px; color: var(--ink-2); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acc-item .caret { transition: transform .2s; font-size: 13px; color: var(--ink-2); }
+.acc-item.open .caret { transform: rotate(180deg); }
+.acc-body { display: none; padding: 4px 20px 18px; }
+.acc-item.open .acc-body { display: block; }
+.acc-play { margin-bottom: 10px; }
+
+/* --- 🧮 每日计算 --- */
+.calc-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px; margin-bottom: 16px;
+}
+.calc-item {
+  background: #fff; border: 2px solid var(--line); border-radius: 14px;
+  padding: 12px 14px; display: flex; align-items: center; gap: 8px;
+  box-shadow: var(--shadow); position: relative;
+}
+.calc-item.ok { border-color: #37b24d; background: #f2fbf4; }
+.calc-item.no { border-color: #f03e3e; background: #fff5f5; }
+.c-q { flex: 1; font-size: 17px; font-weight: 800; color: var(--ink); white-space: nowrap; }
+.c-in {
+  width: 76px; padding: 6px 8px; font-size: 17px; font-weight: 800;
+  border: 2px solid #d9cfae; border-radius: 10px; text-align: center;
+  font-family: inherit; background: #fffdf6;
+}
+.c-in:focus { outline: none; border-color: var(--subj, #1971c2); }
+.c-a {
+  font-size: 13px; font-weight: 800; color: #e03131;
+  background: #ffe3e3; border-radius: 8px; padding: 3px 8px; white-space: nowrap;
+}
+@media print {
+  .c-a { display: none; }
+}
+
+/* --- 🎧 每日听力 --- */
+.ls-toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+.listen-text { margin: 10px 0 14px; }
+.ls-para {
+  font-size: 17px; line-height: 2; color: #333b46; margin: 0 0 10px;
+  padding: 8px 12px; border-radius: 10px; cursor: pointer;
+  transition: background .15s;
+}
+.ls-para:hover { background: var(--subj-soft, #ebfbee); }
+.ls-para.speaking { background: var(--subj-soft, #ebfbee); border-left: 4px solid var(--subj, #2f9e44); }
+.ls-zh {
+  display: none; background: #f6f9ff; border: 1px dashed #9db8e8; border-radius: 12px;
+  padding: 12px 16px; margin: 12px 0; font-size: 14.5px; line-height: 1.9; color: #42506b;
+}
+.ls-zh.show { display: block; }
+.ls-sub { font-size: 17px; margin: 18px 0 10px; color: var(--subj, #2f9e44); }
+.word-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.wc {
+  background: #f2f6fc; border: 1px solid #d4e0f2; border-radius: 999px;
+  padding: 6px 14px; font-size: 14px; color: #3c4d6b;
 }
 
 .side-toggle {
