@@ -154,6 +154,8 @@
     if (grid) grid.innerHTML = subjectCardsHTML();
     var tc = document.getElementById('todayCard');
     if (tc) tc.innerHTML = todayCardHTML();
+    renderStudyStats();
+    setInterval(renderStudyStats, 60000);
   }
 
   /* ---------- 今日闯关推荐(首页):自动找到下一个未完成的单元 ---------- */
@@ -1674,10 +1676,142 @@
     });
   }
 
+  /* ============================================================
+     ⏱ 学习时长统计
+     规则:仅在页面处于前台(可见)时计时;每 30 秒结算一次;
+     切走/关页立即结算;单次结算上限 10 分钟(防挂机、休眠计入)。
+     数据存 localStorage('wxy_study_v1'),按天、按科目累计。
+     ============================================================ */
+  var STUDY_KEY = 'wxy_study_v1';
+  var _studyTimer = null;
+
+  function studyDateStr(d) {
+    d = d || new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function loadStudy() {
+    try {
+      var raw = localStorage.getItem(STUDY_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) { /* 忽略 */ }
+    return { days: {}, last: 0 };
+  }
+  function saveStudy(st) {
+    try { localStorage.setItem(STUDY_KEY, JSON.stringify(st)); } catch (e) { /* 忽略 */ }
+  }
+  function subjectFromHash() {
+    var m = /^#\/([a-z]+)/.exec(location.hash || '');
+    return m ? m[1] : '';
+  }
+  // 结算一次:countTime=true 时把"上次结算到现在"的时长计入(仅前台时段调用)
+  function settleStudy(countTime) {
+    var st = loadStudy();
+    var now = Date.now();
+    if (st.last && now > st.last) {
+      var mins = (now - st.last) / 60000;
+      if (countTime && mins > 0 && mins <= 10) {
+        var dk = studyDateStr();
+        var day = st.days[dk] || { total: 0, subj: {} };
+        day.total += mins;
+        var subj = subjectFromHash();
+        if (subj) day.subj[subj] = (day.subj[subj] || 0) + mins;
+        st.days[dk] = day;
+      }
+    }
+    st.last = now;
+    saveStudy(st);
+    return st;
+  }
+  function fmtStudyMin(m) {
+    m = Math.round(m);
+    if (m < 60) return m + ' 分钟';
+    var h = Math.floor(m / 60), r = m % 60;
+    return h + ' 小时' + (r ? ' ' + r + ' 分钟' : '');
+  }
+  function studyStats() {
+    var st = loadStudy();
+    var now = new Date();
+    var today = (st.days[studyDateStr()] || { total: 0 }).total;
+    var week = 0, total = 0, days = [];
+    for (var i = 6; i >= 0; i--) {
+      var d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+      var dk = studyDateStr(d);
+      var m = (st.days[dk] || { total: 0 }).total || 0;
+      days.push({ dk: dk, label: '周' + '日一二三四五六'.charAt(d.getDay()), m: m });
+      week += m;
+    }
+    for (var k in st.days) total += st.days[k].total || 0;
+    var todaySubj = (st.days[studyDateStr()] || { subj: {} }).subj || {};
+    return { today: today, week: week, total: total, days: days, todaySubj: todaySubj };
+  }
+  function updateStudyChip() {
+    var chip = document.getElementById('studyChip');
+    if (!chip) return;
+    chip.textContent = '⏱ 今日 ' + fmtStudyMin(studyStats().today);
+  }
+  function renderStudyStats() {
+    var root = document.getElementById('studyStats');
+    if (!root) return;
+    var s = studyStats();
+    var max = 0;
+    s.days.forEach(function (x) { if (x.m > max) max = x.m; });
+    if (max < 10) max = 10;
+    var bars = s.days.map(function (x) {
+      var h = Math.max(4, Math.round(x.m / max * 64));
+      var isToday = x.dk === studyDateStr();
+      return '<div class="ss-col">' +
+        '<div class="ss-val">' + (x.m >= 60 ? (Math.round(x.m / 6) / 10) + '时' : Math.round(x.m) + '分') + '</div>' +
+        '<div class="ss-bar' + (isToday ? ' is-today' : '') + '" style="height:' + h + 'px;" title="' + esc(x.dk + ' · ' + fmtStudyMin(x.m)) + '"></div>' +
+        '<div class="ss-day">' + x.label + (isToday ? '·今' : '') + '</div>' +
+        '</div>';
+    }).join('');
+    var subjLine = '';
+    var subjEntries = Object.keys(s.todaySubj);
+    if (subjEntries.length) {
+      subjLine = '<div class="ss-subj">' + subjEntries.map(function (id) {
+        var sub = SUBJECTS[id];
+        return '<span class="ss-subj-item">' + (sub ? sub.emoji : '📖') + ' ' + (sub ? sub.name : id) + ' ' +
+          fmtStudyMin(s.todaySubj[id]) + '</span>';
+      }).join('') + '</div>';
+    }
+    root.innerHTML =
+      '<div class="ss-head"><h2 class="section-title" style="margin-bottom:4px;">⏱ 学习时长</h2>' +
+      '<span class="ss-note">只在页面打开且在前台时计时;关掉页面也会自动保存。</span></div>' +
+      '<div class="ss-cards">' +
+        '<div class="ss-card"><div class="ss-num">' + fmtStudyMin(s.today) + '</div><div class="ss-label">今日学习</div></div>' +
+        '<div class="ss-card"><div class="ss-num">' + fmtStudyMin(s.week) + '</div><div class="ss-label">最近 7 天</div></div>' +
+        '<div class="ss-card"><div class="ss-num">' + fmtStudyMin(s.total) + '</div><div class="ss-label">累计学习</div></div>' +
+      '</div>' +
+      '<div class="ss-bars">' + bars + '</div>' + subjLine;
+  }
+  function startStudyTimer() {
+    if (_studyTimer) return;
+    settleStudy(false);
+    _studyTimer = setInterval(function () {
+      // 后台时只推进 last 不计时;前台正常结算
+      settleStudy(!document.hidden);
+      updateStudyChip();
+    }, 30000);
+    document.addEventListener('visibilitychange', function () {
+      settleStudy(document.hidden);   // 切走:把可见时段结清;切回:重置起点
+      updateStudyChip();
+    });
+    window.addEventListener('pagehide', function () {
+      settleStudy(!document.hidden);
+    });
+    window.addEventListener('beforeunload', function () {
+      settleStudy(!document.hidden);
+    });
+    updateStudyChip();
+  }
+
   /* ---------- 导出 ---------- */
   window.App = {
     initHome: initHome,
     startLearn: startLearn,
-    _subjects: SUBJECTS
+    _subjects: SUBJECTS,
+    renderStudyStats: renderStudyStats,
+    studyStats: studyStats
   };
+  startStudyTimer();
 })();
