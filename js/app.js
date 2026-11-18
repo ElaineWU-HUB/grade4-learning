@@ -496,7 +496,7 @@
       ? '<h2 class="section-title">📅 每日练习</h2>' +
         '<a class="unit-card" href="#/math/calc">' +
         '<span class="no">🧮</span>' +
-        '<span class="info"><b>每日计算 20 题</b><span>每天一页口算练习,夯实计算基本功!</span></span>' +
+        '<span class="info"><b>每日计算 20 题</b><span>每天一页基础题,专练细心:进位退位、数 0 陷阱、逆运算验算!</span></span>' +
         '<span class="state">去算 ›</span></a>'
       : subjId === 'english'
       ? '<h2 class="section-title">📅 每日听说</h2>' +
@@ -1175,39 +1175,111 @@
     var rnd = mulberry32(seed);
     var rint = function (lo, hi) { return lo + Math.floor(rnd() * (hi - lo + 1)); };
     var probs = [];
-    var i, a, b, t;
-    for (i = 0; i < 5; i++) { // 万以内加法
-      a = rint(1000, 9999); b = rint(100, 9999 - a);
+    var i, a, b, t, q, x1, x2, tr;
+
+    function dgt(x, p) { return Math.floor(Math.abs(x) / Math.pow(10, p)) % 10; }
+    function carryN(x, y) {
+      var c = 0, n = 0, p;
+      for (p = 0; p < 4; p++) {
+        var s = dgt(x, p) + dgt(y, p) + c;
+        c = s >= 10 ? 1 : 0;
+        if (c) n++;
+      }
+      return n;
+    }
+    function borrowN(x, y) {
+      var br = 0, n = 0, p;
+      for (p = 0; p < 4; p++) {
+        var da = dgt(x, p) - br, db = dgt(y, p);
+        if (da < db) { n++; br = 1; } else br = 0;
+      }
+      return n;
+    }
+
+    // 1) 进位加法 ×4:每道至少 1 次进位,第 1 道连续进位(≥2 次)
+    for (i = 0; i < 4; i++) {
+      tr = 0; a = 0; b = 0;
+      while (tr++ < 80) {
+        a = rint(1000, 9000); b = rint(100, 9999 - a);
+        if (a + b > 9999) continue;
+        if (carryN(a, b) >= (i === 0 ? 2 : 1)) break;
+      }
+      if (tr > 80) { a = 4786; b = 3575; }
       probs.push({ q: a + ' + ' + b + ' =', a: String(a + b) });
     }
-    for (i = 0; i < 3; i++) { // 万以内减法
-      a = rint(1000, 9999); b = rint(100, a - 1);
+
+    // 2) 退位减法 ×4:第 1 道整千减三位数(连续隔 0 退位),第 2 道隔 0 退位,后 2 道至少 1 次退位
+    for (i = 0; i < 4; i++) {
+      tr = 0; a = 0; b = 0;
+      if (i === 0) {
+        a = rint(2, 9) * 1000;
+        b = rint(100, 999);
+        while (b % 10 === 0) b = rint(100, 999);
+      } else if (i === 1) {
+        while (tr++ < 80) {
+          a = rint(1000, 9999); b = rint(100, a - 1);
+          if (borrowN(a, b) >= 2 && /0/.test(String(a).slice(1, 3))) break;
+        }
+        if (tr > 80) { a = 3025; b = 1867; }
+      } else {
+        while (tr++ < 80) {
+          a = rint(1000, 9999); b = rint(100, a - 1);
+          if (borrowN(a, b) >= 1) break;
+        }
+        if (tr > 80) { a = 9048; b = 5421; }
+      }
       probs.push({ q: a + ' − ' + b + ' =', a: String(a - b) });
     }
-    for (i = 0; i < 4; i++) { // 两位数 × 一位数
-      a = rint(12, 99); b = rint(3, 9);
-      probs.push({ q: a + ' × ' + b + ' =', a: String(a * b) });
-    }
-    for (i = 0; i < 3; i++) { // 三位数 ÷ 一位数(保证整除)
-      b = rint(3, 9); a = rint(100, 999) * b;
-      probs.push({ q: a + ' ÷ ' + b + ' =', a: String(a / b) });
-    }
-    for (i = 0; i < 2; i++) { // 两位数 × 整十
-      a = rint(12, 99); b = rint(2, 9) * 10;
-      probs.push({ q: a + ' × ' + b + ' =', a: String(a * b) });
-    }
-    b = rint(2, 9) * 10; a = rint(3, 9) * b * 10; // 整百 ÷ 整十
-    probs.push({ q: a + ' ÷ ' + b + ' =', a: String(a / b) });
-    for (i = 0; i < 2; i++) { // 一位小数加减
-      var x1 = rint(10, 99) / 10, x2 = rint(10, 99) / 10;
-      if (i === 1) {
-        if (x2 > x1) { t = x1; x1 = x2; x2 = t; }
-        probs.push({ q: x1.toFixed(1) + ' − ' + x2.toFixed(1) + ' =', a: (x1 - x2).toFixed(1) });
-      } else {
-        probs.push({ q: x1.toFixed(1) + ' + ' + x2.toFixed(1) + ' =', a: (x1 + x2).toFixed(1) });
+
+    // 3) 三位数 × 两位数 ×2:第 1 道常规笔算(四年级核心),第 2 道因数末尾都有 0(数 0 陷阱)
+    a = rint(102, 498); b = rint(11, 89);
+    probs.push({ q: a + ' × ' + b + ' =', a: String(a * b) });
+    a = rint(12, 98) * 10; b = rint(2, 9) * 10;
+    probs.push({ q: a + ' × ' + b + ' =', a: String(a * b) });
+
+    // 4) 两位数 × 一位数 ×2:个位必进位(口诀 + 进位)
+    for (i = 0; i < 2; i++) {
+      tr = 0;
+      while (tr++ < 40) {
+        a = rint(54, 99); b = rint(5, 9);
+        if ((a % 10) * b >= 10) break;
       }
+      if (tr > 40) { a = 88; b = 9; }
+      probs.push({ q: a + ' × ' + b + ' =', a: String(a * b) });
     }
-    return probs; // 共 20 题
+
+    // 5) 除法 ×4:整除、商末尾有 0、商中间有 0、整百 ÷ 整十
+    b = rint(4, 9); q = rint(100, 999);
+    probs.push({ q: (b * q) + ' ÷ ' + b + ' =', a: String(q) });
+    b = rint(4, 9); q = rint(2, 9) * 10;
+    probs.push({ q: (b * q) + ' ÷ ' + b + ' =', a: String(q) });
+    b = rint(4, 9); q = rint(1, 9) * 100 + rint(1, 9);
+    probs.push({ q: (b * q) + ' ÷ ' + b + ' =', a: String(q) });
+    b = rint(2, 9) * 10; q = rint(3, 9) * 10;
+    probs.push({ q: (b * q) + ' ÷ ' + b + ' =', a: String(q) });
+
+    // 6) 小数 ×2:一道进位加法,一道整数减小数(小数点对齐陷阱,十分位必退位)
+    tr = 0;
+    do { x1 = rint(12, 98) / 10; x2 = rint(12, 98) / 10; } while ((x1 * 10) % 10 + (x2 * 10) % 10 < 10);
+    probs.push({ q: x1.toFixed(1) + ' + ' + x2.toFixed(1) + ' =', a: (x1 + x2).toFixed(1) });
+    x1 = rint(3, 9);
+    do { x2 = rint(10, 99) / 10; } while (x2 >= x1 || x2 % 1 === 0);
+    probs.push({ q: x1.toFixed(1) + ' − ' + x2.toFixed(1) + ' =', a: (x1 - x2).toFixed(1) });
+
+    // 7) 逆运算填空 ×2:验算思维(严谨)
+    t = rint(4, 9) * 1000; a = rint(1200, t - 200);
+    probs.push({ q: a + ' + □ = ' + t, a: String(t - a) });
+    a = rint(2000, 7000); b = rint(200, 3000);
+    probs.push({ q: '□ − ' + a + ' = ' + b, a: String(a + b) });
+
+    // 打乱顺序:混合题型训练"看准符号"
+    var n = probs.length, j, tmp;
+    while (n > 1) {
+      j = Math.floor(rnd() * n);
+      n--;
+      tmp = probs[n]; probs[n] = probs[j]; probs[j] = tmp;
+    }
+    return probs;
   }
 
   function renderDailyCalc(app) {
@@ -1216,7 +1288,7 @@
     document.body.style.setProperty('--subj-soft', s.soft);
     var seed = dayNumber();
     var p = loadProgress();
-    var bestKey = 'calc-' + seed;
+    var bestKey = 'calc2-' + seed;
     var best = p[bestKey];
     var startTime = Date.now();
     var probs = makeCalcProblems(seed);
@@ -1272,7 +1344,8 @@
       '<div class="breadcrumb"><a href="index.html">首页</a><span class="sep">›</span>' +
       '<a href="#/math">数学</a><span class="sep">›</span>每日计算</div>' +
       '<h1 class="page-title">🧮 每日计算</h1>' +
-      '<p class="page-sub">每天 20 道口算题:万以内加减、乘除法、整十整百、小数加减。限时挑战,刷新每日最佳!</p>' +
+      '<p class="page-sub">每天 20 道基础题,专练"细心"和"严谨":每道加减都有进位/退位,乘除藏"数 0"陷阱,还有小数对位与逆运算验算。做完先检查一遍,再提交!</p>' +
+      '<div class="calc-tip no-print">🦉 细心口诀:① 抄对数字 ② 看准符号 ③ 对齐数位 ④ 做完验算</div>' +
       '<div class="daily-actions no-print" style="margin-bottom:12px;">' +
         '<button class="btn btn-primary" id="btnCalcGrade">📝 提交批改</button>' +
         '<button class="btn btn-ghost" id="btnCalcReset">🔄 重新做一遍</button>' +
