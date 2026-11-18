@@ -719,6 +719,11 @@ table.tb tbody tr:hover { background: #fffcf3; }
 .acc-play { margin-bottom: 10px; }
 
 /* --- 🧮 每日计算 --- */
+.calc-tip {
+  background: #fffbe6; border: 2px dashed #f0c419; border-radius: 12px;
+  padding: 10px 16px; margin: 0 0 14px; font-size: 15px; font-weight: 700;
+  color: #8a6d1a;
+}
 .calc-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: 12px; margin-bottom: 16px;
