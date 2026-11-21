@@ -145,6 +145,14 @@
           '<span>' + starsHTML(stars) + '</span></div>' +
         '</a>';
     });
+    html +=
+      '<a class="subject-card" style="--sc:#7c3aed" href="learn.html#/mystery">' +
+        '<div class="emoji">❓</div>' +
+        '<h2>未解之谜</h2>' +
+        '<div class="desc">世界谜题大收集:事实与科学观点分开看,练就火眼金睛!</div>' +
+        '<div class="progress-track"></div>' +
+        '<div class="meta"><span>' + ((window.MYSTERIES || []).length) + ' 个谜题</span><span>🔍</span></div>' +
+      '</a>';
     return html;
   }
   function initHome() {
@@ -283,6 +291,7 @@
     html += '<a class="side-link" id="sideRead" href="#/chinese/reading"><span class="sl-ico">📖</span><span>每日一读</span></a>' +
       '<a class="side-link" id="sideCalc" href="#/math/calc"><span class="sl-ico">🧮</span><span>每日计算</span></a>' +
       '<a class="side-link" id="sideListen" href="#/english/listening"><span class="sl-ico">🎧</span><span>每日听力</span></a>' +
+      '<a class="side-link" id="sideMystery" href="#/mystery"><span class="sl-ico">❓</span><span>未解之谜</span></a>' +
       '<a class="side-link" href="#/scores"><span class="sl-ico">⭐</span><span>我的成绩</span></a>' +
       '<a class="side-link" href="#/math/game"><span class="sl-ico">🏎️</span><span>口算大挑战</span></a>';
     nav.innerHTML = html;
@@ -311,7 +320,7 @@
         if (semBox) semBox.classList.add('open');
       }
     } else {
-      var dailyId = { reading: 'sideRead', calc: 'sideCalc', listening: 'sideListen' }[r.view];
+      var dailyId = { reading: 'sideRead', calc: 'sideCalc', listening: 'sideListen', mystery: 'sideMystery' }[r.view];
       if (dailyId) {
         var dl = document.getElementById(dailyId);
         if (dl) dl.classList.add('on');
@@ -346,6 +355,7 @@
     var parts = h.split('/').filter(Boolean);
     if (!parts.length) return { view: 'home' };
     if (parts[0] === 'scores') return { view: 'scores' };
+    if (parts[0] === 'mystery') return { view: 'mystery', id: parts[1] || null };
     var subj = parts[0];
     if (SUBJECTS[subj]) {
       if (parts[1] === 'game' && subj === 'math') return { view: 'game', subj: subj };
@@ -386,6 +396,12 @@
       navLinks.forEach(function (a) {
         if (a.getAttribute('href') === '#/scores') a.classList.add('active');
       });
+    } else if (r.view === 'mystery') {
+      document.body.style.setProperty('--subj', '#7c3aed');
+      document.body.style.setProperty('--subj-soft', '#f3f0ff');
+      navLinks.forEach(function (a) {
+        if (a.getAttribute('href') === '#/mystery') a.classList.add('active');
+      });
     }
 
     switch (r.view) {
@@ -399,6 +415,7 @@
       case 'reading': renderDailyReading(app); break;
       case 'calc': renderDailyCalc(app); break;
       case 'listening': renderDailyListening(app); break;
+      case 'mystery': renderMystery(app, r.id); break;
     }
     updateSidebar(r);
     window.scrollTo(0, 0);
@@ -1162,6 +1179,65 @@
     });
   }
 
+  /* ---------- ❓ 未解之谜 ---------- */
+  var MYSTERY_STATUS = {
+    unsolved: { label: '未解之谜', cls: 'my-st-u', emoji: '❓' },
+    partial: { label: '部分解开', cls: 'my-st-p', emoji: '🔍' },
+    solved: { label: '已解开', cls: 'my-st-s', emoji: '✅' }
+  };
+  function mysteryStatusBadge(st) {
+    var m = MYSTERY_STATUS[st] || MYSTERY_STATUS.unsolved;
+    return '<span class="my-st ' + m.cls + '">' + m.emoji + ' ' + m.label + '</span>';
+  }
+  function renderMystery(app, id) {
+    var list = window.MYSTERIES || [];
+    var cats = window.MYSTERY_CATS || [];
+    if (id) {
+      var idx = -1;
+      list.forEach(function (m, i) { if (m.id === id) idx = i; });
+      if (idx < 0) { renderMystery(app, null); return; }
+      var it = list[idx];
+      var prev = idx > 0 ? list[idx - 1] : null;
+      var next = idx < list.length - 1 ? list[idx + 1] : null;
+      var html =
+        '<div class="breadcrumb"><a href="index.html">首页</a><span class="sep">›</span>' +
+        '<a href="#/mystery">未解之谜</a><span class="sep">›</span>' + esc(it.title) + '</div>' +
+        '<h1 class="page-title">' + esc(it.title) + '</h1>' +
+        '<p class="page-sub">' + mysteryStatusBadge(it.status) + '　' + esc(it.q) + '</p>' +
+        '<div class="my-box my-facts"><b>🧐 事实(有据可查)</b>' +
+        it.facts.map(function (f) { return '<p>' + esc(f) + '</p>'; }).join('') + '</div>' +
+        '<div class="my-box my-views"><b>🔬 科学观点</b>' +
+        it.views.map(function (v) { return '<p>' + esc(v) + '</p>'; }).join('') + '</div>' +
+        '<div class="my-box my-tip"><b>🦉 科学眼光</b><p>' + esc(it.tip) + '</p></div>' +
+        '<div class="my-nav no-print">' +
+        (prev ? '<a class="btn btn-ghost" href="#/mystery/' + esc(prev.id) + '">◀ ' + esc(prev.title) + '</a>' : '<span></span>') +
+        '<a class="btn btn-ghost" href="#/mystery">📋 全部谜题</a>' +
+        (next ? '<a class="btn btn-ghost" href="#/mystery/' + esc(next.id) + '">' + esc(next.title) + ' ▶</a>' : '<span></span>') +
+        '</div>';
+      app.innerHTML = html;
+      return;
+    }
+    var html =
+      '<div class="breadcrumb"><a href="index.html">首页</a><span class="sep">›</span>未解之谜</div>' +
+      '<h1 class="page-title">❓ 未解之谜</h1>' +
+      '<p class="page-sub">收集世界上著名的谜题。每个谜都分成"事实"和"科学观点"两部分:先看有据可查的事实,再看科学家的主流看法——练就一双会辨别的眼睛!</p>' +
+      '<div class="my-note no-print">🦉 猫头鹰老师提醒:不是所有"谜"都是真的谜。有的已被科学解开,有的只是传说被夸大——判断的秘诀只有一个字:<b>证据</b>。</div>';
+    cats.forEach(function (c) {
+      var items = list.filter(function (m) { return m.cat === c.id; });
+      if (!items.length) return;
+      html += '<h2 class="section-title">' + c.emoji + ' ' + esc(c.name) + '(' + items.length + ')</h2>' +
+        '<div class="my-grid">' +
+        items.map(function (m) {
+          return '<a class="my-card" href="#/mystery/' + esc(m.id) + '">' +
+            '<div class="my-card-t">' + esc(m.title) + mysteryStatusBadge(m.status) + '</div>' +
+            '<div class="my-card-q">' + esc(m.q) + '</div>' +
+            '</a>';
+        }).join('') +
+        '</div>';
+    });
+    app.innerHTML = html;
+  }
+
   /* ---------- 🧮 每日计算 ---------- */
   function mulberry32(a) {
     return function () {
@@ -1843,7 +1919,9 @@
     if (subjEntries.length) {
       subjLine = '<div class="ss-subj">' + subjEntries.map(function (id) {
         var sub = SUBJECTS[id];
-        return '<span class="ss-subj-item">' + (sub ? sub.emoji : '📖') + ' ' + (sub ? sub.name : id) + ' ' +
+        var nm = id === 'mystery' ? '未解之谜' : (sub ? sub.name : id);
+        var em = id === 'mystery' ? '❓' : (sub ? sub.emoji : '📖');
+        return '<span class="ss-subj-item">' + em + ' ' + nm + ' ' +
           fmtStudyMin(s.todaySubj[id]) + '</span>';
       }).join('') + '</div>';
     }
