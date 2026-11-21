@@ -718,6 +718,26 @@ table.tb tbody tr:hover { background: #fffcf3; }
 .acc-item.open .acc-body { display: block; }
 .acc-play { margin-bottom: 10px; }
 
+/* --- ❓ 未解之谜 --- */
+.my-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.my-card { background: #fff; border: 2px solid var(--line); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow); display: block; transition: transform .15s, border-color .15s; }
+.my-card:hover { transform: translateY(-3px); border-color: #9775fa; }
+.my-card-t { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 800; font-size: 16.5px; color: var(--ink); margin-bottom: 8px; }
+.my-card-q { font-size: 13.5px; color: var(--ink-2); line-height: 1.55; }
+.my-st { display: inline-block; font-size: 12px; font-weight: 800; border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
+.my-st-u { background: #fff0f6; color: #c2255c; border: 1.5px solid #faa2c1; }
+.my-st-p { background: #fff9db; color: #b8860b; border: 1.5px solid #ffd43b; }
+.my-st-s { background: #ebfbee; color: #2b8a3e; border: 1.5px solid #69db7c; }
+.my-note { background: #f3f0ff; border: 2px dashed #b197fc; border-radius: 12px; padding: 10px 16px; margin-bottom: 16px; font-size: 14.5px; color: #5f3dc4; font-weight: 700; }
+.my-box { background: #fff; border: 2px solid var(--line); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; box-shadow: var(--shadow); }
+.my-box b { display: block; margin-bottom: 8px; font-size: 16px; color: var(--ink); }
+.my-box p { margin: 6px 0; font-size: 15.5px; line-height: 1.8; color: var(--ink-2); }
+.my-facts { border-left: 5px solid #339af0; }
+.my-views { border-left: 5px solid #2f9e44; }
+.my-tip { border-left: 5px solid #f6a623; background: #fffdf6; }
+.my-tip p { color: #8a6d1a; }
+.my-nav { display: flex; gap: 10px; justify-content: space-between; align-items: center; margin: 18px 0 4px; }
+
 /* --- 🧮 每日计算 --- */
 .calc-tip {
   background: #fffbe6; border: 2px dashed #f0c419; border-radius: 12px;
